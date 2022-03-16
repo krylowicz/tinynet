@@ -21,8 +21,8 @@ python setup.py develop
   <img src="https://user-images.githubusercontent.com/22550143/158054958-332315a0-8863-4585-a69e-ed60dfc6a597.svg" width="550px" height="550px">
 </p>
 
-### OPS
-tinynet supports these 14 ops, both on cpu and gpu (using PyOpenCL)
+### Functions
+tinynet supports (not yet) these 14 ops, both on cpu and gpu (using PyOpenCL)
 ```
 Relu, Log, Exp                  # unary ops
 Sum, Max                        # reduce ops
