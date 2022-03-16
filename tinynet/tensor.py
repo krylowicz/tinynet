@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Optional
 import numpy as np
-
+ 
 
 class Tensor:
     def __init__(self, data: np.ndarray | list, requires_grad: bool = False) -> None:
@@ -35,6 +35,9 @@ class Tensor:
     def data(self, data: np.ndarray | list) -> None:
         self._data = data if isinstance(data, np.ndarray) else np.array(data)
 
+        if self.requires_grad:
+            self.zero_grad()
+
     @classmethod
     def zeros(cls, shape: tuple) -> Tensor:
         return cls(np.zeros(shape))
@@ -48,7 +51,11 @@ class Tensor:
         return cls(np.random.randn(*shape))
 
     def zero_grad(self) -> None:
-        self.grad = np.zeros_like(self.data)
+        self.grad = np.ones_like(self.data)
 
     def backward(self) -> None:
+        if self._ctx is None:
+            return
+
         assert self.requires_grad, "Attempted to call backward on a non-requires_grad Tensor"
+
