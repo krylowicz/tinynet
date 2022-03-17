@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Optional
 import numpy as np
- 
+
 
 class Tensor:
     def __init__(self, data: np.ndarray | list, requires_grad: bool = False) -> None:
