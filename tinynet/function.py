@@ -1,9 +1,11 @@
-from typing import Any, Callable, List
+from __future__ import annotations
+from functools import partialmethod
+from typing import Any, List
 from tinynet.tensor import Tensor
 
 
 class Context:
-    def __init__(self, op_fn: Callable, *tensors: List[Tensor]) -> None:
+    def __init__(self, op_fn: Function, *tensors: List[Tensor]) -> None:
         self.op_fn = op_fn
         self.parents = tensors
         self.saved_tensors = []
@@ -13,10 +15,10 @@ class Context:
 
 
 class Function:
-    def __init__(self):
+    def __init__(self, *args, **kwargs) -> None:
         cls = self.__class__
         raise RuntimeError(
-            f"{cls} should not be instantiated. "
+            f"{cls} should not be instantiated. Use {cls.__name__}.apply instead."
             f"Ops functions should be defined using static methods."
         )
 
@@ -37,3 +39,14 @@ class Function:
         Needs to be overridden by all subclasses.
         """
         raise NotImplementedError("You must implement the backward method for custom ops function")
+
+    def apply(self, op_fn: Function, *tensors: List[Tensor]) -> Tensor:
+        ctx = Context(op_fn, self, *tensors)
+        ret = Tensor(op_fn.forward(ctx, self.data, *[t.data for t in tensors]))
+        ret._ctx = ctx
+
+        return ret
+
+
+def register(name: str, op_fn: Function) -> None:
+    setattr(Tensor, name, partialmethod(op_fn.apply, op_fn))

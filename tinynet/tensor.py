@@ -59,3 +59,7 @@ class Tensor:
 
         assert self.requires_grad, "Attempted to call backward on a non-requires_grad Tensor"
 
+        if self.grad is None:
+            self.grad = np.ones_like(self.data)
+
+        # TODO: implement backpropagation
