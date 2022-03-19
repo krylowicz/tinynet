@@ -52,3 +52,17 @@ class Pow(Function):
         x, y = ctx.saved_tensors
 
         return y * (x ** (y - 1)) * grad_output, np.log(x) * (x ** y) * grad_output
+
+
+@Function.register
+class Sum(Function):
+    @staticmethod
+    def forward(ctx: Context, x: Tensor) -> Tensor:
+        ctx.save_for_backward(x)
+        return x.sum()
+
+    @staticmethod
+    def backward(ctx: Context, grad_output: Tensor) -> Tensor:
+        x, = ctx.saved_tensors
+
+        return grad_output * np.ones_like(x)
