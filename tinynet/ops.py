@@ -1,9 +1,10 @@
 import numpy as np
 from typing import Tuple
-from tinynet.function import Function, Context, register
+from tinynet.function import Function, Context
 from tinynet.tensor import Tensor
 
 
+@Function.register
 class Add(Function):
     @staticmethod
     def forward(ctx: Context, x: Tensor, y: Tensor) -> Tensor:
@@ -12,9 +13,9 @@ class Add(Function):
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         return grad_output, grad_output
-register('add', Add)
 
 
+@Function.register
 class Sub(Function):
     @staticmethod
     def forward(ctx: Context, x: Tensor, y: Tensor) -> Tensor:
@@ -23,9 +24,9 @@ class Sub(Function):
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         return grad_output, -grad_output
-register('sub', Sub)
 
 
+@Function.register
 class Mul(Function):
     @staticmethod
     def forward(ctx: Context, x: Tensor, y: Tensor) -> Tensor:
@@ -37,9 +38,9 @@ class Mul(Function):
         x, y = ctx.saved_tensors
 
         return y * grad_output, x * grad_output
-register('mul', Mul)
 
 
+@Function.register
 class Pow(Function):
     @staticmethod
     def forward(ctx: Context, x: Tensor, y: Tensor) -> Tensor:
@@ -51,4 +52,3 @@ class Pow(Function):
         x, y = ctx.saved_tensors
 
         return y * (x ** (y - 1)) * grad_output, np.log(x) * (x ** y) * grad_output
-register('pow', Pow)

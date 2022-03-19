@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from functools import partialmethod
 from typing import Any, List
 from tinynet.tensor import Tensor
@@ -47,6 +48,7 @@ class Function:
 
         return ret
 
-
-def register(name: str, op_fn: Function) -> None:
-    setattr(Tensor, name, partialmethod(op_fn.apply, op_fn))
+    @staticmethod
+    def register(cls: Function) -> Function:
+        setattr(Tensor, cls.__name__.lower(), partialmethod(cls.apply, cls))
+        return cls
