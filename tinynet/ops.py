@@ -18,6 +18,23 @@ class Relu(Function):
         return grad_output * (x > 0)
 
 
+@Function.register
+class Logsoftmax(Function):
+    @staticmethod
+    def forward(ctx: Context, x: Tensor) -> Tensor:
+        ctx.save_for_backward(x)
+        exp = np.exp(x - np.max(x))
+
+        return exp / np.sum(exp)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output: Tensor) -> Tensor:
+        x, = ctx.saved_tensors
+        sm = x.reshape(-1, 1)
+
+        return np.diagflat(x) - np.dot(sm, sm.T)
+
+
 # binary ops
 @Function.register
 class Add(Function):
