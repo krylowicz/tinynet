@@ -15,11 +15,11 @@ class Relu(Function):
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tensor:
         x, = ctx.saved_tensors
-        return grad_output * (x > 0)
+        return grad_output * (x >= 0)
 
 
 @Function.register
-class Logsoftmax(Function):
+class Softmax(Function):
     @staticmethod
     def forward(ctx: Context, x: Tensor) -> Tensor:
         ctx.save_for_backward(x)
