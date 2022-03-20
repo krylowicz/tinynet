@@ -31,6 +31,7 @@ class Mul(Function):
     @staticmethod
     def forward(ctx: Context, x: Tensor, y: Tensor) -> Tensor:
         ctx.save_for_backward(x, y)
+
         return x * y
 
     @staticmethod
@@ -45,6 +46,7 @@ class Pow(Function):
     @staticmethod
     def forward(ctx: Context, x: Tensor, y: Tensor) -> Tensor:
         ctx.save_for_backward(x, y)
+
         return x ** y
 
     @staticmethod
@@ -59,10 +61,25 @@ class Sum(Function):
     @staticmethod
     def forward(ctx: Context, x: Tensor) -> Tensor:
         ctx.save_for_backward(x)
-        return x.sum()
+
+        return np.array([x.sum()])
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tensor:
         x, = ctx.saved_tensors
 
         return grad_output * np.ones_like(x)
+
+
+@Function.register
+class Dot(Function):
+    @staticmethod
+    def forward(ctx: Context, x: Tensor, y: Tensor) -> Tensor:
+        ctx.save_for_backward(x, y)
+        return x.dot(y)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
+        x, y = ctx.saved_tensors
+
+        return grad_output.dot(y.T), x.T.dot(grad_output)

@@ -1,11 +1,13 @@
 from __future__ import annotations
+from typing import Optional, TYPE_CHECKING
 
-import numpy as np
-from typing import Optional
+if TYPE_CHECKING:
+    from tinynet.function import Context
 
 
 class Tensor:
-    def __init__(self, data: np.ndarray | list, requires_grad: bool = False) -> None:
+    # TODO: make requires_grad false by default (set to true in op functions)
+    def __init__(self, data: np.ndarray | list, requires_grad: bool = True) -> None:
         self._data = data if isinstance(data, np.ndarray) else np.array(data)
         self.requires_grad = requires_grad
         self.grad: Optional[Tensor] = None
@@ -14,7 +16,7 @@ class Tensor:
             self.zero_grad()
 
         # context for backpropagation
-        self._ctx = None
+        self._ctx: Context | None = None
 
     def __repr__(self) -> str:
         return f"<Tensor with shape {self.shape}, requires_grad={self.requires_grad}>"
@@ -57,9 +59,16 @@ class Tensor:
         if self._ctx is None:
             return
 
-        assert self.requires_grad, "Attempted to call backward on a non-requires_grad Tensor"
+        if self.requires_grad is False:
+            raise ValueError("Attempted to call backward on a non-requires_grad Tensor")
 
-        if self.grad is None:
-            self.grad = np.ones_like(self.data)
+        current_node_grad = self._ctx.op_fn.backward(self._ctx, self.grad)
+        for i, parent in enumerate(parents := self._ctx.parents):
+            if len(parents) == 1:
+                current_node_grad = np.expand_dims(current_node_grad, axis=1)
+            parent.grad = current_node_grad[i]
+            parent.backward()
 
-        # TODO: implement backpropagation
+# TODO: register op functions in a better way
+from tinynet.ops import *
+

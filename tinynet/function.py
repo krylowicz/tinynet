@@ -12,7 +12,7 @@ class Context:
         self.saved_tensors = []
 
     def save_for_backward(self, *tensors: List[Tensor]) -> None:
-        self.saved_tensors.extend(*tensors)
+        self.saved_tensors.extend(tensors)
 
 
 class Function:
