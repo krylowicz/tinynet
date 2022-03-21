@@ -6,7 +6,6 @@ if TYPE_CHECKING:
 
 
 class Tensor:
-    # TODO: make requires_grad false by default (set to true in op functions)
     def __init__(self, data: np.ndarray | list, requires_grad: bool = True) -> None:
         self._data = data if isinstance(data, np.ndarray) else np.array(data)
         self.requires_grad = requires_grad
@@ -20,6 +19,30 @@ class Tensor:
 
     def __repr__(self) -> str:
         return f"<Tensor with shape {self.shape}, requires_grad={self.requires_grad}>"
+
+    def __add__(self, other: Tensor) -> Tensor:
+        return Tensor.add(self, other)
+
+    __radd__ = __add__
+
+    def __sub__(self, other: Tensor) -> Tensor:
+        return Tensor.sub(self, other)
+
+    __rsub__ = __sub__
+
+    def __mul__(self, other: Tensor) -> Tensor:
+        return Tensor.mul(self, other)
+
+    __rmul__ = __mul__
+
+    def __matmul__(self, other: Tensor) -> Tensor:
+        return Tensor.dot(self, other)
+
+    def __pow__(self, power: Tensor) -> Tensor:
+        return Tensor.pow(self, power)
+
+    def dot(self, other: Tensor) -> Tensor:
+        return self.__matmul(other)
 
     @property
     def shape(self) -> tuple:
