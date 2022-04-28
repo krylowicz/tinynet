@@ -6,10 +6,10 @@ if TYPE_CHECKING:
 
 
 class Tensor:
-    def __init__(self, data: np.ndarray | list, requires_grad: bool = True) -> None:
+    def __init__(self, data: np.ndarray | list[int, float], requires_grad: bool = False) -> None:
         self._data = data if isinstance(data, np.ndarray) else np.array(data)
         self.requires_grad = requires_grad
-        self.grad: Optional[Tensor] = None
+        self._grad: Optional[Tensor] = None
 
         if self.requires_grad:
             self.zero_grad()
@@ -18,7 +18,10 @@ class Tensor:
         self._ctx: Context | None = None
 
     def __repr__(self) -> str:
-        return f"<Tensor with shape {self.shape}, requires_grad={self.requires_grad}>"
+        return f'{str(self.data)}{f", grad_fn={self._ctx.op_fn}" if self._ctx.op_fn is not None else ""}'
+
+    def __str__(self) -> str:
+        return self.__repr__()
 
     def __add__(self, other: Tensor) -> Tensor:
         return Tensor.add(self, other)
@@ -41,8 +44,14 @@ class Tensor:
     def __pow__(self, power: Tensor) -> Tensor:
         return Tensor.pow(self, power)
 
+    def __getitem__(self, key: slice | tuple) -> Tensor:
+        return Tensor(self.data[key])
+
+    def __setitem__(self, key: slice | tuple, value: Tensor | np.ndarray) -> None:
+        self.data[key] = value.data if isinstance(value, Tensor) else value
+
     def dot(self, other: Tensor) -> Tensor:
-        return self.__matmul(other)
+        return self.__matmul__(other)
 
     @property
     def shape(self) -> tuple:
@@ -53,8 +62,16 @@ class Tensor:
         return self.data.dtype
 
     @property
+    def grad(self) -> np.ndarray:
+        return self._grad.data
+
+    @property
     def data(self) -> np.ndarray:
         return self._data
+
+    @grad.setter
+    def grad(self, value: np.ndarray) -> None:
+        self._grad = Tensor(value)
 
     @data.setter
     def data(self, data: np.ndarray | list) -> None:
@@ -92,6 +109,6 @@ class Tensor:
             parent.grad = current_node_grad[i]
             parent.backward()
 
+
 # TODO: register op functions in a better way
 from tinynet.ops import *
-

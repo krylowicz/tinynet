@@ -1,17 +1,17 @@
 from __future__ import annotations
 
 from functools import partialmethod
-from typing import Any, List
+from typing import Any
 from tinynet.tensor import Tensor
 
 
 class Context:
-    def __init__(self, op_fn: Function, *tensors: List[Tensor]) -> None:
+    def __init__(self, op_fn: Function, *tensors: Tensor) -> None:
         self.op_fn = op_fn
         self.parents = tensors
         self.saved_tensors = []
 
-    def save_for_backward(self, *tensors: List[Tensor]) -> None:
+    def save_for_backward(self, *tensors: Tensor) -> None:
         self.saved_tensors.extend(tensors)
 
 
@@ -41,8 +41,9 @@ class Function:
         """
         raise NotImplementedError("You must implement the backward method for custom ops function")
 
-    def apply(self, op_fn: Function, *tensors: List[Tensor]) -> Tensor:
+    def apply(self, op_fn: Function, *tensors: Tensor) -> Tensor:
         ctx = Context(op_fn, self, *tensors)
+        # TODO: forward already returns a tensor
         ret = Tensor(op_fn.forward(ctx, self.data, *[t.data for t in tensors]))
         ret._ctx = ctx
 
