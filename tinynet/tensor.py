@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 class Tensor:
     def __init__(self, data: np.ndarray | list[int, float], requires_grad: bool = False) -> None:
-        self._data = data if isinstance(data, np.ndarray) else np.array(data)
+        self._data = data.astype(np.float32) if isinstance(data, np.ndarray) else np.array(data, dtype=np.float32)
         self.requires_grad = requires_grad
         self._grad: Optional[Tensor] = None
 
@@ -18,7 +18,7 @@ class Tensor:
         self._ctx: Context | None = None
 
     def __repr__(self) -> str:
-        return f'{str(self.data)}{f", grad_fn={self._ctx.op_fn}" if self._ctx.op_fn is not None else ""}'
+        return f'{self.data}{f", requires_grad={self.requires_grad}"}{f", grad_fn={self._ctx.op_fn}" if self._ctx is not None else ""}'
 
     def __str__(self) -> str:
         return self.__repr__()
