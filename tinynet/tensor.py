@@ -18,20 +18,35 @@ class Tensor:
         self._ctx: Context | None = None
 
     def __repr__(self) -> str:
-        return f'{self.data}{f", requires_grad={self.requires_grad}"}{f", grad_fn={self._ctx.op_fn}" if self._ctx is not None else ""}'
+        return f"""{self.data}, requires_grad={self.requires_grad}{f", grad_fn={self._ctx.op_fn}" if self._ctx is not None else ''}"""
 
     def __str__(self) -> str:
         return self.__repr__()
+
+    def __getitem__(self, key: slice | tuple) -> Tensor:
+        return Tensor(self.data[key])
+
+    def __setitem__(self, key: slice | tuple, value: Tensor | np.ndarray) -> None:
+        self.data[key] = value.data if isinstance(value, Tensor) else value
+
+    def add(self, other: Tensor) -> Tensor:
+        return Tensor.add(self, other)
 
     def __add__(self, other: Tensor) -> Tensor:
         return Tensor.add(self, other)
 
     __radd__ = __add__
 
+    def sub(self, other: Tensor) -> Tensor:
+        return Tensor.sub(self, other)
+
     def __sub__(self, other: Tensor) -> Tensor:
         return Tensor.sub(self, other)
 
     __rsub__ = __sub__
+
+    def mul(self, other: Tensor) -> Tensor:
+        return Tensor.mul(self, other)
 
     def __mul__(self, other: Tensor) -> Tensor:
         return Tensor.mul(self, other)
@@ -41,17 +56,26 @@ class Tensor:
     def __matmul__(self, other: Tensor) -> Tensor:
         return Tensor.dot(self, other)
 
+    def pow(self, power: Tensor) -> Tensor:
+        return Tensor.pow(self, power)
+
     def __pow__(self, power: Tensor) -> Tensor:
         return Tensor.pow(self, power)
 
-    def __getitem__(self, key: slice | tuple) -> Tensor:
-        return Tensor(self.data[key])
-
-    def __setitem__(self, key: slice | tuple, value: Tensor | np.ndarray) -> None:
-        self.data[key] = value.data if isinstance(value, Tensor) else value
-
     def dot(self, other: Tensor) -> Tensor:
         return self.__matmul__(other)
+
+    def sum(self, axis: int = None) -> Tensor:
+        # TODO: add support for axis in op class
+        return Tensor.sum(self, axis)
+
+    # -- unary ops --
+
+    def relu(self) -> Tensor:
+        return Tensor.relu(self)
+
+    def softmax(self) -> Tensor:
+        return Tensor.softmax(self)
 
     @property
     def shape(self) -> tuple:
