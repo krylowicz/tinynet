@@ -43,8 +43,7 @@ class Function:
 
     def apply(self, op_fn: Function, *tensors: Tensor) -> Tensor:
         ctx = Context(op_fn, self, *tensors)
-        # TODO: forward already returns a tensor
-        ret = Tensor(op_fn.forward(ctx, self.data, *[t.data for t in tensors]))
+        ret = op_fn.forward(ctx, self, *tensors)
         ret._ctx = ctx
 
         return ret
@@ -52,4 +51,5 @@ class Function:
     @staticmethod
     def register(cls: Function) -> Function:
         setattr(Tensor, cls.__name__.lower(), partialmethod(cls.apply, cls))
+
         return cls

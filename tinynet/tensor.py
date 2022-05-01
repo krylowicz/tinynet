@@ -17,6 +17,33 @@ class Tensor:
         # context for backpropagation
         self._ctx: Context | None = None
 
+    @property
+    def shape(self) -> tuple:
+        return self.data.shape
+
+    @property
+    def dtype(self) -> np.dtype:
+        return self.data.dtype
+
+    @property
+    def grad(self) -> np.ndarray:
+        return self._grad.data
+
+    @property
+    def data(self) -> np.ndarray:
+        return self._data
+
+    @grad.setter
+    def grad(self, value: np.ndarray) -> None:
+        self._grad = Tensor(value)
+
+    @data.setter
+    def data(self, data: np.ndarray | list) -> None:
+        self._data = data if isinstance(data, np.ndarray) else np.array(data)
+
+        if self.requires_grad:
+            self.zero_grad()
+
     def __repr__(self) -> str:
         return f"""{self.data}, requires_grad={self.requires_grad}{f", grad_fn={self._ctx.op_fn}" if self._ctx is not None else ''}"""
 
@@ -28,6 +55,11 @@ class Tensor:
 
     def __setitem__(self, key: slice | tuple, value: Tensor | np.ndarray) -> None:
         self.data[key] = value.data if isinstance(value, Tensor) else value
+
+    def zero_grad(self) -> None:
+        self.grad = np.ones_like(self.data)
+
+    # -- binary ops --
 
     def add(self, other: Tensor) -> Tensor:
         return Tensor.add(self, other)
@@ -65,6 +97,8 @@ class Tensor:
     def dot(self, other: Tensor) -> Tensor:
         return self.__matmul__(other)
 
+    # -- reduce ops --
+
     def sum(self, axis: int = None) -> Tensor:
         # TODO: add support for axis in op class
         return Tensor.sum(self, axis)
@@ -77,32 +111,23 @@ class Tensor:
     def softmax(self) -> Tensor:
         return Tensor.softmax(self)
 
-    @property
-    def shape(self) -> tuple:
-        return self.data.shape
+    # -- autograd engine -- maybe move to autograd class?
 
-    @property
-    def dtype(self) -> np.dtype:
-        return self.data.dtype
+    def backward(self) -> None:
+        if self._ctx is None:
+            return
 
-    @property
-    def grad(self) -> np.ndarray:
-        return self._grad.data
+        if self.requires_grad is False:
+            raise ValueError("Attempted to call backward on a non-requires_grad Tensor")
 
-    @property
-    def data(self) -> np.ndarray:
-        return self._data
+        current_node_grad = self._ctx.op_fn.backward(self._ctx, self.grad)
+        for i, parent in enumerate(parents := self._ctx.parents):
+            if len(parents) == 1:
+                current_node_grad = np.expand_dims(current_node_grad.data, axis=1)
+            parent.grad = current_node_grad[i].data
+            parent.backward()
 
-    @grad.setter
-    def grad(self, value: np.ndarray) -> None:
-        self._grad = Tensor(value)
-
-    @data.setter
-    def data(self, data: np.ndarray | list) -> None:
-        self._data = data if isinstance(data, np.ndarray) else np.array(data)
-
-        if self.requires_grad:
-            self.zero_grad()
+    # -- creation helpers --
 
     @classmethod
     def zeros(cls, shape: tuple) -> Tensor:
@@ -115,23 +140,6 @@ class Tensor:
     @classmethod
     def randn(cls, shape: tuple) -> Tensor:
         return cls(np.random.randn(*shape))
-
-    def zero_grad(self) -> None:
-        self.grad = np.ones_like(self.data)
-
-    def backward(self) -> None:
-        if self._ctx is None:
-            return
-
-        if self.requires_grad is False:
-            raise ValueError("Attempted to call backward on a non-requires_grad Tensor")
-
-        current_node_grad = self._ctx.op_fn.backward(self._ctx, self.grad)
-        for i, parent in enumerate(parents := self._ctx.parents):
-            if len(parents) == 1:
-                current_node_grad = np.expand_dims(current_node_grad, axis=1)
-            parent.grad = current_node_grad[i]
-            parent.backward()
 
 
 # TODO: register op functions in a better way
