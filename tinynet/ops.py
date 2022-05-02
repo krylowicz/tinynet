@@ -6,33 +6,20 @@ from tinynet.function import Function, Context
 
 # unary ops
 @Function.register
-class Relu(Function):
+class ReLU(Function):
     @staticmethod
     def forward(ctx: Context, x: Tensor) -> Tensor:
         ctx.save_for_backward(x)
-        return np.maximum(x, 0)
+
+        return Tensor(np.maximum(0, x.data), requires_grad=x.requires_grad)
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tensor:
         x, = ctx.saved_tensors
-        return grad_output * (x >= 0)
 
+        grad = grad_output.data * (x.data >= 0)
 
-@Function.register
-class Softmax(Function):
-    @staticmethod
-    def forward(ctx: Context, x: Tensor) -> Tensor:
-        ctx.save_for_backward(x)
-        exp = np.exp(x - np.max(x))
-
-        return exp / np.sum(exp)
-
-    @staticmethod
-    def backward(ctx: Context, grad_output: Tensor) -> Tensor:
-        x, = ctx.saved_tensors
-        sm = x.reshape(-1, 1)
-
-        return np.diagflat(x) - np.dot(sm, sm.T)
+        return Tensor(grad)
 
 
 # binary ops
@@ -40,22 +27,40 @@ class Softmax(Function):
 class Add(Function):
     @staticmethod
     def forward(ctx: Context, x: Tensor, y: Tensor) -> Tensor:
-        return x + y
+        ctx.save_for_backward(x, y)
+
+        requires_grad = x.requires_grad or y.requires_grad
+
+        return Tensor(x.data + y.data, requires_grad=requires_grad)
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
-        return grad_output, grad_output
+        x, y = ctx.saved_tensors
+
+        grad_x = np.ones(x.shape) * grad_output
+        grad_y = np.ones(y.shape) * grad_output
+
+        return grad_x, grad_y
 
 
 @Function.register
 class Sub(Function):
     @staticmethod
     def forward(ctx: Context, x: Tensor, y: Tensor) -> Tensor:
-        return x - y
+        ctx.save_for_backward(x, y)
+
+        requires_grad = x.requires_grad or y.requires_grad
+
+        return Tensor(x.data - y.data, requires_grad=requires_grad)
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
-        return grad_output, -grad_output
+        x, y = ctx.saved_tensors
+
+        grad_x = np.ones(x.shape) * grad_output
+        grad_y = -np.ones(y.shape) * grad_output
+
+        return grad_x, grad_y
 
 
 @Function.register
@@ -64,28 +69,18 @@ class Mul(Function):
     def forward(ctx: Context, x: Tensor, y: Tensor) -> Tensor:
         ctx.save_for_backward(x, y)
 
-        return x * y
+        requires_grad = x.requires_grad or y.requires_grad
+
+        return Tensor(x.data * y.data, requires_grad=requires_grad)
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         x, y = ctx.saved_tensors
 
-        return y * grad_output, x * grad_output
+        grad_x = Tensor(y.data * grad_output.data)
+        grad_y = Tensor(x.data * grad_output.data)
 
-
-@Function.register
-class Pow(Function):
-    @staticmethod
-    def forward(ctx: Context, x: Tensor, y: Tensor) -> Tensor:
-        ctx.save_for_backward(x, y)
-
-        return x ** y
-
-    @staticmethod
-    def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
-        x, y = ctx.saved_tensors
-
-        return y * (x ** (y - 1)) * grad_output, np.log(x) * (x ** y) * grad_output
+        return grad_x, grad_y
 
 
 @Function.register
@@ -93,13 +88,19 @@ class Dot(Function):
     @staticmethod
     def forward(ctx: Context, x: Tensor, y: Tensor) -> Tensor:
         ctx.save_for_backward(x, y)
-        return x.dot(y)
+
+        requires_grad = x.requires_grad or y.requires_grad
+
+        return Tensor(x.data @ y.data, requires_grad=requires_grad)
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         x, y = ctx.saved_tensors
 
-        return grad_output.dot(y.T), x.T.dot(grad_output)
+        grad_x = Tensor(grad_output.data @ y.data.T)
+        grad_y = Tensor(x.data.T @ grad_output.data)
+
+        return grad_x, grad_y
 
 
 # reduce ops
@@ -109,11 +110,12 @@ class Sum(Function):
     def forward(ctx: Context, x: Tensor) -> Tensor:
         ctx.save_for_backward(x)
 
-        return np.array([x.sum()])
+        return Tensor(x.data.sum(keepdims=True), requires_grad=x.requires_grad)
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tensor:
         x, = ctx.saved_tensors
 
-        return grad_output * np.ones_like(x)
+        grad = np.broadcast_to(grad_output.data, x.shape)
 
+        return Tensor(grad)

@@ -118,7 +118,7 @@ class Tensor:
             return
 
         if self.requires_grad is False:
-            raise ValueError("Attempted to call backward on a non-requires_grad Tensor")
+            raise RuntimeError("Attempted to call backward on a non-requires_grad Tensor")
 
         current_node_grad = self._ctx.op_fn.backward(self._ctx, self.grad)
         for i, parent in enumerate(parents := self._ctx.parents):

@@ -41,7 +41,7 @@ class Function:
         """
         raise NotImplementedError("You must implement the backward method for custom ops function")
 
-    def apply(self, op_fn: Function, *tensors: Tensor) -> Tensor:
+    def apply(self: Tensor, op_fn: Function, *tensors: Tensor) -> Tensor:
         ctx = Context(op_fn, self, *tensors)
         ret = op_fn.forward(ctx, self, *tensors)
         ret._ctx = ctx
