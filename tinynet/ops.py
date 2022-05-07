@@ -64,6 +64,29 @@ class Sub(Function):
 
 
 @Function.register
+class Pow(Function):
+    @staticmethod
+    def forward(ctx: Context, x: Tensor, y: Tensor) -> Tensor:
+        ctx.save_for_backward(x, y)
+
+        requires_grad = x.requires_grad or y.requires_grad
+
+        return Tensor(x.data ** y.data, requires_grad=requires_grad)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
+        x, y = ctx.saved_tensors
+
+        x = x.data
+        y = y.data
+
+        grad_x = Tensor(y * (x ** (y - 1)) * grad_output.data)
+        grad_y = Tensor(x ** y * np.log(x) * grad_output.data)
+
+        return grad_x, grad_y
+
+
+@Function.register
 class Mul(Function):
     @staticmethod
     def forward(ctx: Context, x: Tensor, y: Tensor) -> Tensor:

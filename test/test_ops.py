@@ -40,3 +40,6 @@ class TestOps(unittest.TestCase):
 
     def test_relu(self):
         helper([(10, 10)], Tensor.relu, torch.relu)
+
+    def test_pow(self):
+        helper([(10, 10), (10, 10)], Tensor.pow, torch.pow)
