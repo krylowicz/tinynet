@@ -37,8 +37,8 @@ class Add(Function):
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         x, y = ctx.saved_tensors
 
-        grad_x = np.ones(x.shape) * grad_output
-        grad_y = np.ones(y.shape) * grad_output
+        grad_x = Tensor(np.ones(x.shape) * grad_output.data)
+        grad_y = Tensor(np.ones(y.shape) * grad_output.data)
 
         return grad_x, grad_y
 
@@ -57,8 +57,8 @@ class Sub(Function):
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         x, y = ctx.saved_tensors
 
-        grad_x = np.ones(x.shape) * grad_output
-        grad_y = -np.ones(y.shape) * grad_output
+        grad_x = Tensor(np.ones(x.shape) * grad_output.data)
+        grad_y = Tensor(-np.ones(y.shape) * grad_output.data)
 
         return grad_x, grad_y
 

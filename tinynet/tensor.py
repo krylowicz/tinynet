@@ -26,16 +26,16 @@ class Tensor:
         return self.data.dtype
 
     @property
-    def grad(self) -> np.ndarray:
-        return self._grad.data
+    def grad(self) -> Tensor:
+        return self._grad
 
     @property
     def data(self) -> np.ndarray:
         return self._data
 
     @grad.setter
-    def grad(self, value: np.ndarray) -> None:
-        self._grad = Tensor(value)
+    def grad(self, value: Tensor | np.ndarray) -> None:
+        self._grad = value if isinstance(value, Tensor) else Tensor(value)
 
     @data.setter
     def data(self, data: np.ndarray | list) -> None:
@@ -45,7 +45,8 @@ class Tensor:
             self.zero_grad()
 
     def __repr__(self) -> str:
-        return f"""{self.data}, requires_grad={self.requires_grad}{f", grad_fn={self._ctx.op_fn}" if self._ctx is not None else ''}"""
+        return f"""{self.data}, requires_grad={self.requires_grad}
+        {f", grad_fn={self._ctx.op_fn}" if self._ctx is not None else ''}"""
 
     def __str__(self) -> str:
         return self.__repr__()
@@ -123,8 +124,8 @@ class Tensor:
         current_node_grad = self._ctx.op_fn.backward(self._ctx, self.grad)
         for i, parent in enumerate(parents := self._ctx.parents):
             if len(parents) == 1:
-                current_node_grad = np.expand_dims(current_node_grad.data, axis=1)
-            parent.grad = current_node_grad[i].data
+                current_node_grad = np.expand_dims(current_node_grad.data, axis=0)
+            parent.grad = current_node_grad[i]
             parent.backward()
 
     # -- creation helpers --
