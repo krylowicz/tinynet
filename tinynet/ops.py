@@ -22,6 +22,38 @@ class ReLU(Function):
         return Tensor(grad)
 
 
+@Function.register
+class Softmax(Function):
+    @staticmethod
+    def forward(ctx: Context, x: Tensor) -> Tensor:
+        e_x = np.exp(x.data - np.max(x.data, axis=1, keepdims=True))
+        softmax = e_x / np.sum(e_x, axis=1, keepdims=True)
+
+        ctx.save_for_backward(softmax)
+
+        return Tensor(softmax, requires_grad=x.requires_grad)
+
+    @staticmethod
+    def backward(ctx: Context, g: Tensor) -> Tensor:
+        softmax, = ctx.saved_tensors
+
+        def softmax_vector_derivative(softmax: np.ndarray, grad_output: np.ndarray) -> np.ndarray:
+            shape = softmax.shape
+
+            softmax = np.reshape(softmax, (1, -1))
+            grad_output = np.reshape(grad_output, (1, -1))
+
+            d_softmax = softmax * np.identity(softmax.size) - softmax.T @ softmax
+
+            return (grad_output @ d_softmax).reshape(shape)
+
+        grad = np.empty_like(softmax)
+        for i in range(softmax.shape[0]):
+            grad[i] = softmax_vector_derivative(softmax[i], g.data[i])
+
+        return Tensor(grad)
+
+
 # binary ops
 @Function.register
 class Add(Function):

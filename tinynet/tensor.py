@@ -45,8 +45,7 @@ class Tensor:
             self.zero_grad()
 
     def __repr__(self) -> str:
-        return f"""{self.data}, requires_grad={self.requires_grad}
-        {f", grad_fn={self._ctx.op_fn}" if self._ctx is not None else ''}"""
+        return f"""{self.data}, requires_grad={self.requires_grad}{f", grad_fn={self._ctx.op_fn}" if self._ctx is not None else ''}"""
 
     def __str__(self) -> str:
         return self.__repr__()

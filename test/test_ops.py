@@ -43,3 +43,7 @@ class TestOps(unittest.TestCase):
 
     def test_pow(self):
         helper([(10, 10), (10, 10)], Tensor.pow, torch.pow)
+
+    def test_softmax(self):
+        helper([(1, 10)], Tensor.softmax, lambda x: torch.softmax(x, dim=1))
+        helper([(32, 10)], Tensor.softmax, lambda x: torch.softmax(x, dim=1))
