@@ -14,3 +14,13 @@ class Optimizer:
     def zero_grad(self) -> None:
         for param in self.params:
             param.grad.zero_grad()
+
+
+class SGD(Optimizer):
+    def __init__(self, params: Iterable[Tensor], lr: float = 0.01) -> None:
+        super().__init__(params)
+        self.lr = lr
+
+    def step(self) -> None:
+        for param in self.params:
+            param.data -= self.lr * param.grad.data
