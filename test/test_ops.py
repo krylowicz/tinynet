@@ -1,7 +1,7 @@
 import torch
 import numpy as np
-from tinynet.tensor import Tensor
 import unittest
+from tinynet.tensor import Tensor
 
 
 def helper(shapes, tiny_op, torch_op):
