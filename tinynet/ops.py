@@ -34,7 +34,7 @@ class Softmax(Function):
         return Tensor(softmax, requires_grad=x.requires_grad)
 
     @staticmethod
-    def backward(ctx: Context, g: Tensor) -> Tensor:
+    def backward(ctx: Context, grad_output: Tensor) -> Tensor:
         softmax, = ctx.saved_tensors
 
         def softmax_vector_derivative(softmax: np.ndarray, grad_output: np.ndarray) -> np.ndarray:
@@ -49,7 +49,26 @@ class Softmax(Function):
 
         grad = np.empty_like(softmax)
         for i in range(softmax.shape[0]):
-            grad[i] = softmax_vector_derivative(softmax[i], g.data[i])
+            grad[i] = softmax_vector_derivative(softmax[i], grad_output.data[i])
+
+        return Tensor(grad)
+
+
+@Function.register
+class LogSoftmax(Function):
+    @staticmethod
+    def forward(ctx: Context, x: Tensor) -> Tensor:
+        b = np.max(x.data, axis=1)
+        softmax = x.data - (b + np.log(np.sum(np.exp(x.data - b[:, np.newaxis]), axis=1))).reshape((-1, 1))
+        ctx.save_for_backward(softmax)
+
+        return Tensor(softmax, requires_grad=x.requires_grad)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output: Tensor) -> Tensor:
+        softmax, = ctx.saved_tensors
+
+        grad = grad_output.data - np.exp(softmax) * grad_output.data.sum(axis=1, keepdims=True)
 
         return Tensor(grad)
 

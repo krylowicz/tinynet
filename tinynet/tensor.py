@@ -26,7 +26,7 @@ class Tensor:
         return self.data.dtype
 
     @property
-    def grad(self) -> Tensor:
+    def grad(self) -> Optional[Tensor]:
         return self._grad
 
     @property
