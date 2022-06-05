@@ -50,4 +50,4 @@ class TestOps(unittest.TestCase):
 
     def test_logsoftmax(self):
         helper([(1, 10)], Tensor.logsoftmax, lambda x: torch.log_softmax(x, dim=1))
-        # helper([(32, 10)], Tensor.logsoftmax, lambda x: torch.log_softmax(x, dim=1))
+        helper([(32, 10)], Tensor.logsoftmax, lambda x: torch.log_softmax(x, dim=1))
