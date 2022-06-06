@@ -15,7 +15,7 @@ class Tensor:
             self.zero_grad()
 
         # context for backpropagation
-        self._ctx: Context | None = None
+        self._ctx: Optional[Context] = None
 
     @property
     def shape(self) -> tuple:
@@ -45,7 +45,8 @@ class Tensor:
             self.zero_grad()
 
     def __repr__(self) -> str:
-        return f"""{self.data}, requires_grad={self.requires_grad}{f", grad_fn={self._ctx.op_fn}" if self._ctx is not None else ''}"""
+        return f"""{self.data}, requires_grad={self.requires_grad}
+        {f", grad_fn={self._ctx.op_fn}" if self._ctx is not None else ''}"""
 
     def __str__(self) -> str:
         return self.__repr__()
@@ -97,6 +98,9 @@ class Tensor:
     def dot(self, other: Tensor) -> Tensor:
         return self.__matmul__(other)
 
+    def mean(self) -> Tensor:
+        return self.sum().mul(Tensor(np.array([1 / np.prod(self.shape)])))
+
     # -- reduce ops --
 
     def sum(self, axis: int = None) -> Tensor:
@@ -111,7 +115,10 @@ class Tensor:
     def softmax(self) -> Tensor:
         return Tensor.softmax(self)
 
-    # -- autograd engine -- maybe move to autograd class?
+    def logsoftmax(self) -> Tensor:
+        return Tensor.logsoftmax(self)
+
+    # -- autograd engine --
 
     def backward(self) -> None:
         if self._ctx is None:
