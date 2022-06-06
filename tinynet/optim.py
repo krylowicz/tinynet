@@ -1,7 +1,5 @@
-from typing import Iterable, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from tinynet.tensor import Tensor
+from typing import Iterable
+from tinynet.tensor import Tensor
 
 
 class Optimizer:

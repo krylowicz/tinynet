@@ -86,6 +86,10 @@ class Tensor:
 
     __rmul__ = __mul__
 
+    def __neg__(self) -> Tensor:
+        self.data = -self.data
+        return self
+
     def __matmul__(self, other: Tensor) -> Tensor:
         return Tensor.dot(self, other)
 
