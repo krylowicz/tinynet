@@ -28,10 +28,11 @@ class Softmax(Function):
     def forward(ctx: Context, x: Tensor) -> Tensor:
         e_x = np.exp(x.data - np.max(x.data, axis=1, keepdims=True))
         softmax = e_x / np.sum(e_x, axis=1, keepdims=True)
+        softmax = Tensor(softmax, requires_grad=x.requires_grad)
 
         ctx.save_for_backward(softmax)
 
-        return Tensor(softmax, requires_grad=x.requires_grad)
+        return softmax
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tensor:
@@ -47,9 +48,9 @@ class Softmax(Function):
 
             return (grad_output @ d_softmax).reshape(shape)
 
-        grad = np.empty_like(softmax)
+        grad = np.empty_like(softmax.data)
         for i in range(softmax.shape[0]):
-            grad[i] = softmax_vector_derivative(softmax[i], grad_output.data[i])
+            grad[i] = softmax_vector_derivative(softmax.data[i], grad_output.data[i])
 
         return Tensor(grad)
 
@@ -60,15 +61,17 @@ class LogSoftmax(Function):
     def forward(ctx: Context, x: Tensor) -> Tensor:
         b = np.max(x.data, axis=1)
         softmax = x.data - (b + np.log(np.sum(np.exp(x.data - b[:, np.newaxis]), axis=1))).reshape((-1, 1))
+        softmax = Tensor(softmax, requires_grad=x.requires_grad)
+
         ctx.save_for_backward(softmax)
 
-        return Tensor(softmax, requires_grad=x.requires_grad)
+        return softmax
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tensor:
         softmax, = ctx.saved_tensors
 
-        grad = grad_output.data - np.exp(softmax) * grad_output.data.sum(axis=1, keepdims=True)
+        grad = grad_output.data - np.exp(softmax.data) * grad_output.data.sum(axis=1, keepdims=True)
 
         return Tensor(grad)
 
