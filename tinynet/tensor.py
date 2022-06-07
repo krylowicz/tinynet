@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import numpy as np
 from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -151,7 +153,3 @@ class Tensor:
     @classmethod
     def randn(cls, shape: tuple) -> Tensor:
         return cls(np.random.randn(*shape))
-
-
-# TODO: register op functions in a better way
-from tinynet.ops import *
