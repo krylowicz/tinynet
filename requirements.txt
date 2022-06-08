@@ -1,4 +1,5 @@
 numpy>=1.22.3
+requests
 # testing
 pytest
 torch
