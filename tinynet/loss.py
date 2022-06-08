@@ -19,7 +19,7 @@ class CrossEntropyLoss(Loss):
 
     def forward(self, predicted: Tensor, target: Tensor) -> Tensor:
         """
-        Computes the cross entropy loss between input and target
+        Computes the cross entropy loss between predicted and target
 
         predicted: (batch_size, n_classes) raw, un-normalized scores for each class
         target: range [0, n_classes)
