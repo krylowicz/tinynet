@@ -8,10 +8,16 @@ if TYPE_CHECKING:
 
 
 class Tensor:
-    def __init__(self, data: np.ndarray | list[int, float], requires_grad: bool = False) -> None:
+    def __init__(
+        self,
+        data: np.ndarray | list[int, float],
+        requires_grad: bool = False,
+        is_parameter: bool = False
+    ) -> None:
         self._data = data.astype(np.float32) if isinstance(data, np.ndarray) else np.array(data, dtype=np.float32)
-        self.requires_grad = requires_grad
         self._grad: Optional[Tensor] = None
+        self.requires_grad = requires_grad
+        self.is_parameter = is_parameter
 
         if self.requires_grad:
             self.zero_grad()
