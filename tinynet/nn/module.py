@@ -48,4 +48,4 @@ class Module:
 
     def _ensure_is_initialized(self) -> None:
         if self.__dict__.get("_submodules") is None:
-            raise RuntimeError(f"{self.__name__} is not initialized. Did you run super().__init__()?")
+            raise RuntimeError(f"{self.__class__.__name__} is not initialized. Did you run super().__init__()?")

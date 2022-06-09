@@ -14,8 +14,9 @@ class Context:
     def save_for_backward(self, *tensors: Tensor) -> None:
         for tensor in tensors:
             if type(tensor) is not Tensor:
-                raise TypeError(f"Got {type(tensor)} instead of Tensor. Only Tensors should be saved in "
-                                f"save_for_backward(). To save constants, save directly as a new attribute."
+                raise TypeError(
+                    f"Got {type(tensor)} instead of Tensor. Only Tensors should be saved in "
+                    f"save_for_backward(). To save constants, save directly as a new attribute."
                 )
 
             self.saved_tensors.append(tensor)

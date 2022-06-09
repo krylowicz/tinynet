@@ -7,7 +7,7 @@ class Optimizer:
         self.params = list(params)
 
     def step(self) -> None:
-        raise NotImplementedError
+        raise NotImplementedError("Subclass of Optimizer must implement step method.")
 
     def zero_grad(self) -> None:
         for param in self.params:
