@@ -41,6 +41,10 @@ class Tensor:
     def data(self) -> np.ndarray:
         return self._data
 
+    @property
+    def T(self) -> Tensor:
+        return self.transpose()
+
     @grad.setter
     def grad(self, value: Tensor | np.ndarray) -> None:
         self._grad = value if isinstance(value, Tensor) else Tensor(value)
@@ -96,6 +100,7 @@ class Tensor:
 
     def __neg__(self) -> Tensor:
         self.data = -self.data
+
         return self
 
     def __matmul__(self, other: Tensor) -> Tensor:
@@ -112,6 +117,11 @@ class Tensor:
 
     def mean(self) -> Tensor:
         return self.sum().mul(Tensor(np.array([1 / np.prod(self.shape)])))
+
+    def transpose(self) -> Tensor:
+        self.data = self.data.T
+
+        return self
 
     # -- reduce ops --
 
