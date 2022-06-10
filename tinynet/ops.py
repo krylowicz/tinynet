@@ -30,6 +30,40 @@ class ReLU(Function):
 
 
 @Function.register
+class Exp(Function):
+    @staticmethod
+    def forward(ctx: Context, x: Tensor) -> Tensor:
+        ctx.save_for_backward(x)
+
+        return Tensor(np.exp(x.data), requires_grad=x.requires_grad)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output: Tensor) -> Tensor:
+        x, = ctx.saved_tensors
+
+        grad = unbroadcast(grad_output.data * np.exp(x.data), x.shape)
+
+        return Tensor(grad)
+
+
+@Function.register
+class Log(Function):
+    @staticmethod
+    def forward(ctx: Context, x: Tensor) -> Tensor:
+        ctx.save_for_backward(x)
+
+        return Tensor(np.log(x.data), requires_grad=x.requires_grad)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output: Tensor) -> Tensor:
+        x, = ctx.saved_tensors
+
+        grad = unbroadcast(grad_output.data / x.data, x.shape)
+
+        return Tensor(grad)
+
+
+@Function.register
 class Softmax(Function):
     @staticmethod
     def forward(ctx: Context, x: Tensor) -> Tensor:

@@ -26,7 +26,26 @@ def helper(shapes, tiny_op, torch_op):
         np.testing.assert_allclose(tiny_grad.grad.data, torch_grad.grad.detach().numpy(), atol=1e-5)
 
 
-class TestOps(unittest.TestCase):
+class TestUnaryOps(unittest.TestCase):
+    def test_relu(self):
+        helper([(10, 10)], Tensor.relu, torch.relu)
+
+    def test_exp(self):
+        helper([(10, 10)], Tensor.exp, torch.exp)
+
+    def test_log(self):
+        helper([(10, 10)], Tensor.log, torch.log)
+
+    def test_softmax(self):
+        helper([(1, 10)], Tensor.softmax, lambda x: torch.softmax(x, dim=1))
+        helper([(32, 10)], Tensor.softmax, lambda x: torch.softmax(x, dim=1))
+
+    def test_logsoftmax(self):
+        helper([(1, 10)], Tensor.logsoftmax, lambda x: torch.log_softmax(x, dim=1))
+        helper([(32, 10)], Tensor.logsoftmax, lambda x: torch.log_softmax(x, dim=1))
+
+
+class TestBinaryOps(unittest.TestCase):
     def test_add(self):
         helper([(25, 25), (25, 25)], Tensor.add, torch.add)
 
@@ -39,16 +58,5 @@ class TestOps(unittest.TestCase):
     def test_matmul(self):
         helper([(25, 25), (25, 25)], Tensor.dot, torch.matmul)
 
-    def test_relu(self):
-        helper([(10, 10)], Tensor.relu, torch.relu)
-
     def test_pow(self):
         helper([(10, 10), (10, 10)], Tensor.pow, torch.pow)
-
-    def test_softmax(self):
-        helper([(1, 10)], Tensor.softmax, lambda x: torch.softmax(x, dim=1))
-        helper([(32, 10)], Tensor.softmax, lambda x: torch.softmax(x, dim=1))
-
-    def test_logsoftmax(self):
-        helper([(1, 10)], Tensor.logsoftmax, lambda x: torch.log_softmax(x, dim=1))
-        helper([(32, 10)], Tensor.logsoftmax, lambda x: torch.log_softmax(x, dim=1))

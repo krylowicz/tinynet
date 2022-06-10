@@ -112,6 +112,12 @@ class Tensor:
     def __pow__(self, power: Tensor) -> Tensor:
         return Tensor.pow(self, power)
 
+    def exp(self) -> Tensor:
+        return Tensor.exp(self)
+
+    def log(self) -> Tensor:
+        return Tensor.log(self)
+
     def dot(self, other: Tensor) -> Tensor:
         return self.__matmul__(other)
 
