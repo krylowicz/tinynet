@@ -1,4 +1,5 @@
 from typing import Iterable
+
 from tinynet.tensor import Tensor
 
 

@@ -18,4 +18,4 @@ class Linear(Module):
         self.bias = Tensor(bias, requires_grad=True, is_parameter=True)
 
     def forward(self, x: Tensor) -> Tensor:
-        return x.dot(self.weight)
+        return x.dot(self.weight) + self.bias

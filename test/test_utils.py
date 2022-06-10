@@ -1,7 +1,8 @@
 import unittest
 import numpy as np
-from tinynet.utils import to_one_hot
+
 from tinynet.tensor import Tensor
+from tinynet.utils import to_one_hot
 
 
 class TestUtils(unittest.TestCase):

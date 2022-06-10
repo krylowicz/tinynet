@@ -1,4 +1,5 @@
 import numpy as np
+
 from tinynet.tensor import Tensor
 
 

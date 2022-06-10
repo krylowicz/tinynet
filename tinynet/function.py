@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from functools import partialmethod
 from typing import Any
+
 from tinynet.tensor import Tensor
 
 

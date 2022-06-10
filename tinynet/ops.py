@@ -1,7 +1,14 @@
 import numpy as np
-from typing import Tuple
+
 from tinynet.tensor import Tensor
 from tinynet.function import Function, Context
+
+
+def unbroadcast(grad: np.ndarray, shape: tuple[int, ...]) -> np.ndarray:
+    while len(grad.shape) != len(shape):
+        grad = np.sum(grad, axis=0)
+
+    return grad
 
 
 # unary ops
@@ -17,7 +24,7 @@ class ReLU(Function):
     def backward(ctx: Context, grad_output: Tensor) -> Tensor:
         x, = ctx.saved_tensors
 
-        grad = grad_output.data * (x.data >= 0)
+        grad = unbroadcast(grad_output.data * (x.data >= 0), x.shape)
 
         return Tensor(grad)
 
@@ -88,13 +95,13 @@ class Add(Function):
         return Tensor(x.data + y.data, requires_grad=requires_grad)
 
     @staticmethod
-    def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
+    def backward(ctx: Context, grad_output: Tensor) -> tuple[Tensor, Tensor]:
         x, y = ctx.saved_tensors
 
-        grad_x = Tensor(np.ones(x.shape) * grad_output.data)
-        grad_y = Tensor(np.ones(y.shape) * grad_output.data)
+        grad_x = unbroadcast(np.ones(x.shape) * grad_output.data, x.shape)
+        grad_y = unbroadcast(np.ones(y.shape) * grad_output.data, y.shape)
 
-        return grad_x, grad_y
+        return Tensor(grad_x), Tensor(grad_y)
 
 
 @Function.register
@@ -108,13 +115,13 @@ class Sub(Function):
         return Tensor(x.data - y.data, requires_grad=requires_grad)
 
     @staticmethod
-    def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
+    def backward(ctx: Context, grad_output: Tensor) -> tuple[Tensor, Tensor]:
         x, y = ctx.saved_tensors
 
-        grad_x = Tensor(np.ones(x.shape) * grad_output.data)
-        grad_y = Tensor(-np.ones(y.shape) * grad_output.data)
+        grad_x = unbroadcast(np.ones(x.shape) * grad_output.data, x.shape)
+        grad_y = unbroadcast(-np.ones(y.shape) * grad_output.data, y.shape)
 
-        return grad_x, grad_y
+        return Tensor(grad_x), Tensor(grad_y)
 
 
 @Function.register
@@ -128,7 +135,7 @@ class Pow(Function):
         return Tensor(x.data ** y.data, requires_grad=requires_grad)
 
     @staticmethod
-    def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
+    def backward(ctx: Context, grad_output: Tensor) -> tuple[Tensor, Tensor]:
         x, y = ctx.saved_tensors
 
         x = x.data
@@ -151,13 +158,13 @@ class Mul(Function):
         return Tensor(x.data * y.data, requires_grad=requires_grad)
 
     @staticmethod
-    def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
+    def backward(ctx: Context, grad_output: Tensor) -> tuple[Tensor, Tensor]:
         x, y = ctx.saved_tensors
 
-        grad_x = Tensor(y.data * grad_output.data)
-        grad_y = Tensor(x.data * grad_output.data)
+        grad_x = unbroadcast(y.data * grad_output.data, x.shape)
+        grad_y = unbroadcast(x.data * grad_output.data, y.shape)
 
-        return grad_x, grad_y
+        return Tensor(grad_x), Tensor(grad_y)
 
 
 @Function.register
@@ -171,13 +178,13 @@ class Dot(Function):
         return Tensor(x.data @ y.data, requires_grad=requires_grad)
 
     @staticmethod
-    def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
+    def backward(ctx: Context, grad_output: Tensor) -> tuple[Tensor, Tensor]:
         x, y = ctx.saved_tensors
 
-        grad_x = Tensor(grad_output.data @ y.data.T)
-        grad_y = Tensor(x.data.T @ grad_output.data)
+        grad_x = unbroadcast(grad_output.data @ y.data.T, x.shape)
+        grad_y = unbroadcast(x.data.T @ grad_output.data, y.shape)
 
-        return grad_x, grad_y
+        return Tensor(grad_x), Tensor(grad_y)
 
 
 # reduce ops
