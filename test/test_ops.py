@@ -60,3 +60,30 @@ class TestBinaryOps(unittest.TestCase):
 
     def test_pow(self):
         helper([(10, 10), (10, 10)], Tensor.pow, torch.pow)
+
+
+class TestReduceOps(unittest.TestCase):
+    def test_sum(self):
+        pass
+
+    def test_max(self):
+        pass
+
+
+class TestMovementOps(unittest.TestCase):
+    def test_reshape(self):
+        pass
+
+    def test_transpose(self):
+        pass
+
+    def test_slice(self):
+        pass
+
+
+class TestProcessingOps(unittest.TestCase):
+    def test_conv1d(self):
+        pass
+
+    def test_conv2d(self):
+        pass

@@ -125,6 +125,7 @@ class Tensor:
         return self.sum().mul(Tensor(np.array([1 / np.prod(self.shape)])))
 
     def transpose(self) -> Tensor:
+        # TODO: convert to an op
         self.data = self.data.T
 
         return self
