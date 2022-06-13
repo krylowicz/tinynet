@@ -103,8 +103,14 @@ class Tensor:
 
         return self
 
+    def matmul(self, other: Tensor) -> Tensor:
+        return Tensor.matmul(self, other)
+
     def __matmul__(self, other: Tensor) -> Tensor:
-        return Tensor.dot(self, other)
+        return Tensor.matmul(self, other)
+
+    def dot(self, other: Tensor) -> Tensor:
+        return self.__matmul__(other)
 
     def pow(self, power: Tensor) -> Tensor:
         return Tensor.pow(self, power)
@@ -117,9 +123,6 @@ class Tensor:
 
     def log(self) -> Tensor:
         return Tensor.log(self)
-
-    def dot(self, other: Tensor) -> Tensor:
-        return self.__matmul__(other)
 
     def mean(self) -> Tensor:
         return self.sum().mul(Tensor(np.array([1 / np.prod(self.shape)])))

@@ -202,7 +202,7 @@ class Mul(Function):
 
 
 @Function.register
-class Dot(Function):
+class Matmul(Function):
     @staticmethod
     def forward(ctx: Context, x: Tensor, y: Tensor) -> Tensor:
         ctx.save_for_backward(x, y)
