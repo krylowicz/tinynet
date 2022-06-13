@@ -237,6 +237,6 @@ class Sum(Function):
         if ctx.axis is not None and not ctx.keepdims:
             grad = np.expand_dims(grad_output.data, axis=ctx.axis)
         else:
-            grad = grad_output.data
+            grad = np.broadcast_to(grad_output.data, ctx.input_shape)
 
         return Tensor(grad)
