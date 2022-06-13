@@ -225,15 +225,18 @@ class Matmul(Function):
 @Function.register
 class Sum(Function):
     @staticmethod
-    def forward(ctx: Context, x: Tensor) -> Tensor:
-        ctx.save_for_backward(x)
+    def forward(ctx: Context, x: Tensor, axis: int = None, keepdims: bool = True) -> Tensor:
+        ctx.input_shape = x.shape
+        ctx.axis = axis
+        ctx.keepdims = keepdims
 
-        return Tensor(x.data.sum(keepdims=True), requires_grad=x.requires_grad)
+        return Tensor(x.data.sum(axis=axis), requires_grad=x.requires_grad)
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tensor:
-        x, = ctx.saved_tensors
-
-        grad = np.broadcast_to(grad_output.data, x.shape)
+        if ctx.axis is not None and not ctx.keepdims:
+            grad = np.expand_dims(grad_output.data, axis=ctx.axis)
+        else:
+            grad = grad_output.data
 
         return Tensor(grad)

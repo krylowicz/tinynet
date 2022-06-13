@@ -135,9 +135,8 @@ class Tensor:
 
     # -- reduce ops --
 
-    def sum(self, axis: int = None) -> Tensor:
-        # TODO: add support for axis in op class
-        return Tensor.sum(self, axis)
+    def sum(self, axis: int = None, keepdims: bool = True) -> Tensor:
+        return Tensor.sum(self, axis=axis, keepdims=keepdims)
 
     # -- unary ops --
 

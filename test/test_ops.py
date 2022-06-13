@@ -64,7 +64,10 @@ class TestBinaryOps(unittest.TestCase):
 
 class TestReduceOps(unittest.TestCase):
     def test_sum(self):
-        pass
+        helper([(32, 16, 16, 3)], Tensor.sum, torch.sum)
+        helper([(32, 16, 16, 3)], lambda x: x.sum(axis=0), lambda x: torch.sum(x, dim=0))
+        helper([(32, 16, 16, 3)], lambda x: x.sum(axis=3), lambda x: torch.sum(x, dim=3))
+        helper([(32, 16, 16, 3)], lambda x: x.sum(axis=(1, 3)), lambda x: torch.sum(x, dim=(1, 3)))
 
     def test_max(self):
         pass
