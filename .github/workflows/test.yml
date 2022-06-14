@@ -1,0 +1,22 @@
+name: Unit Tests
+
+on: [push, pull_request]
+
+jobs:
+  numpy_cpu:
+    name: Numpy tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Update packages
+        uses: sudo apt-get update
+      - name: Set up python 3.10
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10
+      - name: Install dependencies
+        run: pip install -e '.[testing]'
+      - name: Run tests
+        run: python -m pytest -v -s

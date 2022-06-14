@@ -1,6 +1,6 @@
 .idea
 .DS_Store
-tinynet.egg-info
+*.egg-info
 .mypy_cache
 .pytest_cache
 __pycache__

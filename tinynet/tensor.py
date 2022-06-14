@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 class Tensor:
     def __init__(
         self,
-        data: np.ndarray | list[int, float],
+        data: np.ndarray | list[int | float],
         requires_grad: bool = False,
         is_parameter: bool = False
     ) -> None:
@@ -37,17 +37,13 @@ class Tensor:
     def grad(self) -> Tensor | None:
         return self._grad
 
+    @grad.setter
+    def grad(self, value: Tensor | np.ndarray) -> None:
+        self._grad = value if isinstance(value, Tensor) else Tensor(value, requires_grad=True)
+
     @property
     def data(self) -> np.ndarray:
         return self._data
-
-    @property
-    def T(self) -> Tensor:
-        return self.transpose()
-
-    @grad.setter
-    def grad(self, value: Tensor | np.ndarray) -> None:
-        self._grad = value if isinstance(value, Tensor) else Tensor(value)
 
     @data.setter
     def data(self, data: np.ndarray | list) -> None:
@@ -55,6 +51,10 @@ class Tensor:
 
         if self.requires_grad:
             self.zero_grad()
+
+    @property
+    def T(self) -> Tensor:
+        return self.transpose()
 
     def __repr__(self) -> str:
         return f"""{self.data}, requires_grad={self.requires_grad}
@@ -167,6 +167,7 @@ class Tensor:
 
     # -- creation helpers --
 
+    # TODO: args and kwargs support
     @classmethod
     def zeros(cls, shape: tuple) -> Tensor:
         return cls(np.zeros(shape))

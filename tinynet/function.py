@@ -10,7 +10,7 @@ class Context:
     def __init__(self, op_fn: Function, *tensors: Tensor) -> None:
         self.op_fn = op_fn
         self.parents = tensors
-        self.saved_tensors = []
+        self.saved_tensors: list[Tensor] = []
 
     def save_for_backward(self, *tensors: Tensor) -> None:
         for tensor in tensors:
