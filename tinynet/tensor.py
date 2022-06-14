@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from tinynet.function import Context
@@ -15,7 +15,7 @@ class Tensor:
         is_parameter: bool = False
     ) -> None:
         self._data = data.astype(np.float32) if isinstance(data, np.ndarray) else np.array(data, dtype=np.float32)
-        self._grad: Optional[Tensor] = None
+        self._grad: Tensor | None = None
         self.requires_grad = requires_grad
         self.is_parameter = is_parameter
 
@@ -23,7 +23,7 @@ class Tensor:
             self.zero_grad()
 
         # context for backpropagation
-        self._ctx: Optional[Context] = None
+        self._ctx: Context | None = None
 
     @property
     def shape(self) -> tuple:
@@ -34,7 +34,7 @@ class Tensor:
         return self.data.dtype
 
     @property
-    def grad(self) -> Optional[Tensor]:
+    def grad(self) -> Tensor | None:
         return self._grad
 
     @property
