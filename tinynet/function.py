@@ -9,7 +9,7 @@ from tinynet.tensor import Tensor
 class Context:
     def __init__(self, op_fn: Function, *tensors: Tensor) -> None:
         self.op_fn = op_fn
-        self.parents = tensors
+        self.parents = [tensor for tensor in tensors if type(tensor) is Tensor]
         self.saved_tensors: list[Tensor] = []
 
     def save_for_backward(self, *tensors: Tensor) -> None:
@@ -33,7 +33,7 @@ class Function:
 
     @staticmethod
     def forward(ctx: Context, *args: Any, **kwargs: Any) -> Any:
-        r"""
+        """
         Performs the forward pass of the function.
 
         Needs to be overridden by all subclasses.
@@ -42,7 +42,7 @@ class Function:
 
     @staticmethod
     def backward(ctx: Context, *args: Any, **kwargs: Any) -> Any:
-        r"""
+        """
         Defines a formula for differentiating the function on the backward pass.
 
         Needs to be overridden by all subclasses.

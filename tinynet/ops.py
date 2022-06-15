@@ -240,3 +240,17 @@ class Sum(Function):
             grad = np.broadcast_to(grad_output.data, ctx.input_shape)
 
         return Tensor(grad)
+
+
+# movement ops
+@Function.register
+class Permute(Function):
+    @staticmethod
+    def forward(ctx: Context, x: Tensor, axis: tuple) -> Tensor:
+        ctx.axis = axis
+
+        return Tensor(np.transpose(x.data, axis), requires_grad=x.requires_grad)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output: Tensor) -> Tensor:
+        return Tensor(np.transpose(grad_output.data, np.argsort(ctx.axis).tolist()))

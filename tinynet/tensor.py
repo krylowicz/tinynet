@@ -19,9 +19,6 @@ class Tensor:
         self.requires_grad = requires_grad
         self.is_parameter = is_parameter
 
-        if self.requires_grad:
-            self.zero_grad()
-
         # context for backpropagation
         self._ctx: Context | None = None
 
@@ -49,9 +46,6 @@ class Tensor:
     def data(self, data: np.ndarray | list) -> None:
         self._data = data if isinstance(data, np.ndarray) else np.array(data)
 
-        if self.requires_grad:
-            self.zero_grad()
-
     @property
     def T(self) -> Tensor:
         return self.transpose()
@@ -68,9 +62,6 @@ class Tensor:
 
     def __setitem__(self, key: slice | tuple, value: Tensor | np.ndarray) -> None:
         self.data[key] = value.data if isinstance(value, Tensor) else value
-
-    def zero_grad(self) -> None:
-        self.grad = np.ones_like(self.data)
 
     # -- binary ops --
 
@@ -127,11 +118,8 @@ class Tensor:
     def mean(self) -> Tensor:
         return self.sum().mul(Tensor(np.array([1 / np.prod(self.shape)])))
 
-    def transpose(self) -> Tensor:
-        # TODO: convert to an op
-        self.data = self.data.T
-
-        return self
+    def transpose(self, axis: tuple[int, int] = (1, 0)) -> Tensor:
+        return self.permute(axis)
 
     # -- reduce ops --
 
@@ -158,7 +146,9 @@ class Tensor:
         if self.requires_grad is False:
             raise RuntimeError("Attempted to call backward on a non-requires_grad Tensor")
 
-        current_node_grad = self._ctx.op_fn.backward(self._ctx, self.grad)
+        output_grad = Tensor.ones(self.shape)
+
+        current_node_grad = self._ctx.op_fn.backward(self._ctx, output_grad)
         for i, parent in enumerate(parents := self._ctx.parents):
             if len(parents) == 1:
                 current_node_grad = np.expand_dims(current_node_grad.data, axis=0)
