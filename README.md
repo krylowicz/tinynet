@@ -4,9 +4,9 @@
 </p>
 
 <hr />
-![Unit Tests](https://github.com/krylowicz/tinynet/workflows/Unit%20Tests/badge.svg) <br />
-tinynet is yet another deep learning framework built solely for the purpose of learning about pytorch, autograd technique and deep learning
+tinynet is a yet another deep learning framework built solely for the purpose of learning about pytorch, autograd technique and deep learning
 
+![tests](https://github.com/krylowicz/tinynet/actions/workflows/test.yml/badge.svg)
 ## Installation
 ```
 pip3 install git+https://github.com/krylowicz/tinynet.git --upgrade
