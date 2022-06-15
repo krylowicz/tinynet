@@ -159,13 +159,13 @@ class Tensor:
 
     # TODO: args and kwargs support
     @classmethod
-    def zeros(cls, shape: tuple) -> Tensor:
-        return cls(np.zeros(shape))
+    def zeros(cls, shape: tuple, **kwargs) -> Tensor:
+        return cls(np.zeros(shape), **kwargs)
 
     @classmethod
-    def ones(cls, shape: tuple) -> Tensor:
-        return cls(np.ones(shape))
+    def ones(cls, shape: tuple, **kwargs) -> Tensor:
+        return cls(np.ones(shape), **kwargs)
 
     @classmethod
-    def randn(cls, shape: tuple) -> Tensor:
-        return cls(np.random.randn(*shape))
+    def randn(cls, shape: tuple, **kwargs) -> Tensor:
+        return cls(np.random.randn(*shape), **kwargs)
