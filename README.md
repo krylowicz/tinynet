@@ -4,7 +4,7 @@
 </p>
 
 <hr />
-
+![Unit Tests](https://github.com/krylowicz/tinynet/workflows/Unit%20Tests/badge.svg) <br />
 tinynet is yet another deep learning framework built solely for the purpose of learning about pytorch, autograd technique and deep learning
 
 ## Installation
