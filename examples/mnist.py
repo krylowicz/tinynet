@@ -37,7 +37,7 @@ for _ in (t := trange(1000)):
 
     cat = np.argmax(out.data, axis=1)
     accuracy = (cat == y.data).mean()
-    t.set_description(f"loss {loss.data[0, 0]:.4f} accuracy {accuracy:.4f}")
+    t.set_description(f"loss {loss.data[0]:.4f} accuracy {accuracy:.4f}")
 
 
 model.eval()

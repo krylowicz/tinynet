@@ -19,6 +19,9 @@ class Tensor:
         self.requires_grad = requires_grad
         self.is_parameter = is_parameter
 
+        if self.requires_grad:
+            self.zero_grad()
+
         # context for backpropagation
         self._ctx: Context | None = None
 
@@ -36,7 +39,7 @@ class Tensor:
 
     @grad.setter
     def grad(self, value: Tensor | np.ndarray) -> None:
-        self._grad = value if isinstance(value, Tensor) else Tensor(value, requires_grad=True)
+        self._grad = value if isinstance(value, Tensor) else Tensor(value)
 
     @property
     def data(self) -> np.ndarray:
@@ -62,6 +65,9 @@ class Tensor:
 
     def __setitem__(self, key: slice | tuple, value: Tensor | np.ndarray) -> None:
         self.data[key] = value.data if isinstance(value, Tensor) else value
+
+    def zero_grad(self) -> None:
+        self.grad = np.ones_like(self.data)
 
     # -- binary ops --
 
@@ -146,9 +152,7 @@ class Tensor:
         if self.requires_grad is False:
             raise RuntimeError("Attempted to call backward on a non-requires_grad Tensor")
 
-        output_grad = Tensor.ones(self.shape)
-
-        current_node_grad = self._ctx.op_fn.backward(self._ctx, output_grad)
+        current_node_grad = self._ctx.op_fn.backward(self._ctx, self.grad)
         for i, parent in enumerate(parents := self._ctx.parents):
             if len(parents) == 1:
                 current_node_grad = np.expand_dims(current_node_grad.data, axis=0)
@@ -157,7 +161,6 @@ class Tensor:
 
     # -- creation helpers --
 
-    # TODO: args and kwargs support
     @classmethod
     def zeros(cls, shape: tuple, **kwargs) -> Tensor:
         return cls(np.zeros(shape), **kwargs)
