@@ -56,6 +56,7 @@ class Function:
 
         return ret
 
+    # TODO: register already defined, i and r ops
     @staticmethod
     def register(cls: Function) -> Function:
         setattr(Tensor, cls.__name__.lower(), partialmethod(cls.apply, cls))
