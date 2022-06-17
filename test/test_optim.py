@@ -64,8 +64,15 @@ def torch_optimizer(optimizer, **kwargs):
 class TestOptim(unittest.TestCase):
     def test_sgd(self):
         for x, y in zip(tiny_optimizer(optim.SGD, lr=0.01), torch_optimizer(torch_optim.SGD, lr=0.01)):
-            self.assertTrue(np.allclose(x, y))
+            np.testing.assert_allclose(x, y)
+
+    def test_optim(self):
+        for x, y in zip(
+            tiny_optimizer(optim.RMSProp, lr=0.001, decay=0.9, eps=1e-8),
+            torch_optimizer(torch_optim.RMSprop, lr=0.001, alpha=0.9, eps=1e-8)
+        ):
+            np.testing.assert_allclose(x, y)
 
     def test_adam(self):
         for x, y in zip(tiny_optimizer(optim.Adam), torch_optimizer(torch_optim.Adam)):
-            self.assertTrue(np.allclose(x, y))
+            np.testing.assert_allclose(x, y)

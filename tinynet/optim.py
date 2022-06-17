@@ -27,13 +27,34 @@ class SGD(Optimizer):
             param.data -= self.lr * param.grad.data
 
 
-class Adam(Optimizer):
+class RMSProp(Optimizer):
     def __init__(
         self,
         params: Iterable[Tensor],
         lr: float = 0.001,
-        betas: tuple[float, float] = (0.9, 0.999),
+        decay: float = 0.9,
         eps: float = 1e-8
+    ) -> None:
+        super().__init__(params)
+        self.lr = lr
+        self.decay = decay
+        self.eps = eps
+
+        self.v = [Tensor.zeros(p.shape) for p in self.params]
+
+    def step(self) -> None:
+        for i, param in enumerate(self.params):
+            self.v[i].data = self.decay * self.v[i].data + (1 - self.decay) * (param.grad.data * param.grad.data)
+            param.data -= self.lr * param.grad.data / (np.sqrt(self.v[i].data) + self.eps)
+
+
+class Adam(Optimizer):
+    def __init__(
+            self,
+            params: Iterable[Tensor],
+            lr: float = 0.001,
+            betas: tuple[float, float] = (0.9, 0.999),
+            eps: float = 1e-8
     ) -> None:
         super().__init__(params)
         self.lr = lr
