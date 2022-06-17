@@ -18,7 +18,11 @@ jobs:
         python-version: '3.10'
     - name: Install dependencies
       run: pip install -e '.[testing]'
-    - name: Run tests
-      run: python -m pytest -v -s
+    - name: Run op tests
+      run: python -m pytest test/test_ops.py -v -s
+    - name: Run optim tests
+      run: python -m pytest test/test_optim.py -v -s
     - name: Run mnist example
       run: python examples/mnist.py
+    - name: Run other tests
+      run: python -m pytest test/test_tensor.py test/test_utils.py -v -s
