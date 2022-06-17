@@ -45,4 +45,5 @@ y_test_preds_out = model.forward(Tensor(X_test.reshape((-1, 28 * 28))))
 y_test_preds = np.argmax(y_test_preds_out.data, axis=1)
 eval_acc = (y_test == y_test_preds).mean()
 
+assert eval_acc > 0.9
 print(f"eval accuracy: {eval_acc}")

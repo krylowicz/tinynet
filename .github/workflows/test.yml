@@ -20,3 +20,5 @@ jobs:
       run: pip install -e '.[testing]'
     - name: Run tests
       run: python -m pytest -v -s
+    - name: Run mnist example
+      run: python examples/mnist.py
