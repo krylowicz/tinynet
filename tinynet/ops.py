@@ -244,6 +244,21 @@ class Sum(Function):
 
 # movement ops
 @Function.register
+class Reshape(Function):
+    @staticmethod
+    def forward(ctx: Context, x: Tensor, shape: tuple) -> Tensor:
+        ctx.save_for_backward(x)
+
+        return Tensor(x.data.reshape(shape), requires_grad=x.requires_grad)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output: Tensor) -> Tensor:
+        x, = ctx.saved_tensors
+
+        return Tensor(grad_output.data.reshape(x.shape))
+
+
+@Function.register
 class Permute(Function):
     @staticmethod
     def forward(ctx: Context, x: Tensor, axis: tuple) -> Tensor:

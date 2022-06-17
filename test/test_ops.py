@@ -75,7 +75,7 @@ class TestReduceOps(unittest.TestCase):
 
 class TestMovementOps(unittest.TestCase):
     def test_reshape(self):
-        pass
+        helper([(2, 3, 4)], lambda x: x.reshape((2, 12)), lambda x: torch.reshape(x, (2, 12)))
 
     def test_permute(self):
         helper([(6, 5, 4)], lambda x: x.permute((2, 0, 1)), lambda x: torch.permute(x, (2, 0, 1)))
