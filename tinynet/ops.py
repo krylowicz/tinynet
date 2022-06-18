@@ -225,21 +225,25 @@ class Matmul(Function):
 @Function.register
 class Sum(Function):
     @staticmethod
-    def forward(ctx: Context, x: Tensor, axis: int = None, keepdims: bool = True) -> Tensor:
+    def forward(ctx: Context, x: Tensor, axis: int | tuple[int, ...] = None, keepdims: bool = False) -> Tensor:
+        print(axis, keepdims)
+
         ctx.input_shape = x.shape
-        ctx.axis = axis
+        ctx.axis = axis if isinstance(axis, int) or axis is None else tuple(axis)
         ctx.keepdims = keepdims
 
-        return Tensor(x.data.sum(axis=axis), requires_grad=x.requires_grad)
+        out = np.sum(x.data, axis=axis, keepdims=keepdims)
+
+        return Tensor(out if keepdims else np.squeeze(out), requires_grad=x.requires_grad)
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tensor:
-        if ctx.axis is not None and not ctx.keepdims:
-            grad = np.expand_dims(grad_output.data, axis=ctx.axis)
-        else:
-            grad = np.broadcast_to(grad_output.data, ctx.input_shape)
+        if ctx.keepdims or ctx.axis is None:
+            return Tensor(np.broadcast_to(grad_output.data, ctx.input_shape))
 
-        return Tensor(grad)
+        shape = [1 if i in ctx.axis else ctx.input_shape[i] for i in range(len(ctx.input_shape))]
+
+        return Tensor(np.broadcast_to(np.ones(shape), ctx.input_shape))
 
 
 # movement ops
