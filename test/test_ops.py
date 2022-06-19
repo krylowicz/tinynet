@@ -74,6 +74,8 @@ class TestReduceOps(unittest.TestCase):
     def test_max(self):
         helper([(25, 25)], Tensor.max, torch.max)
         helper([(25, 25)], lambda x: x.max(axis=0, keepdims=True), lambda x: torch.max(x, dim=0, keepdim=True)[0])
+        helper([(25, 25)], lambda x: x.max(axis=0), lambda x: torch.max(x, dim=0)[0])
+        helper([(25, 3)], lambda x: x.max(axis=0).mul(Tensor(np.array(0.5))), lambda x: torch.max(x, dim=0)[0].mul(0.5))
 
 
 class TestMovementOps(unittest.TestCase):

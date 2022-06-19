@@ -244,6 +244,27 @@ class Sum(Function):
         return Tensor(np.broadcast_to(grad_output.data.reshape(shape), ctx.input_shape))
 
 
+@Function.register
+class Max(Function):
+    @staticmethod
+    def forward(ctx: Context, x: Tensor, axis: int  = None, keepdims: bool = False) -> Tensor:
+        ctx.input = x.data
+        ctx.input_shape = x.shape
+        ctx.axis = axis if axis is None else [axis]
+        ctx.keepdims = keepdims
+
+        out = np.max(x.data, axis=axis, keepdims=keepdims)
+
+        ctx.out = out
+
+        return Tensor(out if keepdims else np.squeeze(out), requires_grad=x.requires_grad)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output: Tensor) -> Tensor:
+        max_pos = (ctx.out == ctx.input).astype(np.float32)
+
+        return Tensor(max_pos * grad_output.data)
+
 # movement ops
 @Function.register
 class Reshape(Function):
