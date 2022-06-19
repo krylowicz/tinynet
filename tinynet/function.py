@@ -59,7 +59,9 @@ class Function:
     # TODO: register already defined, i and r ops
     @staticmethod
     def register(cls: Function) -> Function:
-        setattr(Tensor, cls.__name__.lower() if cls.__name__.lower() != "sum" else "_sum", partialmethod(cls.apply, cls))
-        # setattr(Tensor, cls.__name__.lower(), partialmethod(cls.apply, cls))
+        if (op_name := cls.__name__.lower()) in {"sum", "max"}:
+            setattr(Tensor, f"_{op_name}", partialmethod(cls.apply, cls))
+        else:
+            setattr(Tensor, op_name, partialmethod(cls.apply, cls))
 
         return cls

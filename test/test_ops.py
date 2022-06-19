@@ -72,7 +72,8 @@ class TestReduceOps(unittest.TestCase):
         helper([(32, 16, 16, 3)], lambda x: x.sum(axis=(1, 3)), lambda x: torch.sum(x, dim=(1, 3)))
 
     def test_max(self):
-        pass
+        helper([(25, 25)], Tensor.max, torch.max)
+        helper([(25, 25)], lambda x: x.max(axis=0, keepdims=True), lambda x: torch.max(x, dim=0, keepdim=True)[0])
 
 
 class TestMovementOps(unittest.TestCase):

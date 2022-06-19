@@ -129,8 +129,11 @@ class Tensor:
 
     # -- reduce ops --
 
-    def sum(self, axis: int = None, keepdims: bool = False) -> Tensor:
+    def sum(self, axis: int | tuple[int, ...] = None, keepdims: bool = False) -> Tensor:
         return self._sum(axis=axis, keepdims=keepdims)
+
+    def max(self, axis: int = None, keepdims: bool = False) -> Tensor:
+        return self._max(axis=axis, keepdims=keepdims)
 
     # -- unary ops --
 
