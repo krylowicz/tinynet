@@ -226,10 +226,8 @@ class Matmul(Function):
 class Sum(Function):
     @staticmethod
     def forward(ctx: Context, x: Tensor, axis: int | tuple[int, ...] = None, keepdims: bool = False) -> Tensor:
-        print(axis, keepdims)
-
         ctx.input_shape = x.shape
-        ctx.axis = axis if isinstance(axis, int) or axis is None else tuple(axis)
+        ctx.axis = axis if isinstance(axis, (tuple, list)) or axis is None else [axis]
         ctx.keepdims = keepdims
 
         out = np.sum(x.data, axis=axis, keepdims=keepdims)

@@ -24,7 +24,7 @@ class Context:
 
 
 class Function:
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         cls = self.__class__
         raise RuntimeError(
             f"{cls} should not be instantiated. Use {cls.__name__}.apply instead."
@@ -59,6 +59,7 @@ class Function:
     # TODO: register already defined, i and r ops
     @staticmethod
     def register(cls: Function) -> Function:
-        setattr(Tensor, cls.__name__.lower(), partialmethod(cls.apply, cls))
+        setattr(Tensor, cls.__name__.lower() if cls.__name__.lower() != "sum" else "_sum", partialmethod(cls.apply, cls))
+        # setattr(Tensor, cls.__name__.lower(), partialmethod(cls.apply, cls))
 
         return cls

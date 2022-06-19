@@ -84,6 +84,7 @@ class TestMovementOps(unittest.TestCase):
 
     def test_transpose(self):
         helper([(2, 3)], lambda x: x.transpose((1, 0)), lambda x: torch.permute(x, (1, 0)))
+        helper([(2, 3)], lambda x: x.transpose((1, 0)), lambda x: torch.transpose(x, 1, 0))
 
     def test_slice(self):
         pass

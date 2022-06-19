@@ -129,8 +129,8 @@ class Tensor:
 
     # -- reduce ops --
 
-    def sum(self, axis: int = None, keepdims: bool = True) -> Tensor:
-        return Tensor.sum(self, axis=axis, keepdims=keepdims)
+    def sum(self, axis: int = None, keepdims: bool = False) -> Tensor:
+        return self._sum(axis=axis, keepdims=keepdims)
 
     # -- unary ops --
 
