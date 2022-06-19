@@ -241,7 +241,7 @@ class Sum(Function):
 
         shape = [1 if i in ctx.axis else ctx.input_shape[i] for i in range(len(ctx.input_shape))]
 
-        return Tensor(np.broadcast_to(np.ones(shape), ctx.input_shape))
+        return Tensor(np.broadcast_to(grad_output.data.reshape(shape), ctx.input_shape))
 
 
 # movement ops
