@@ -55,6 +55,9 @@ class TestBinaryOps(unittest.TestCase):
     def test_mul(self):
         helper([(25, 25), (25, 25)], Tensor.mul, torch.mul)
 
+    def test_div(self):
+        helper([(10, 10), (10, 10)], Tensor.div, torch.div)
+
     def test_matmul(self):
         helper([(25, 25), (25, 25)], Tensor.dot, torch.matmul)
 

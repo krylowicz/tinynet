@@ -95,6 +95,9 @@ class Tensor:
 
     __rmul__ = __mul__
 
+    def div(self, other: Tensor) -> Tensor:
+        return Tensor.div(self, other)
+
     def __neg__(self) -> Tensor:
         self.data = -self.data
 
