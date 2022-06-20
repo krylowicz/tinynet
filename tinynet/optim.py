@@ -50,11 +50,11 @@ class RMSProp(Optimizer):
 
 class Adam(Optimizer):
     def __init__(
-            self,
-            params: Iterable[Tensor],
-            lr: float = 0.001,
-            betas: tuple[float, float] = (0.9, 0.999),
-            eps: float = 1e-8
+        self,
+        params: Iterable[Tensor],
+        lr: float = 0.001,
+        betas: tuple[float, float] = (0.9, 0.999),
+        eps: float = 1e-8
     ) -> None:
         super().__init__(params)
         self.lr = lr
