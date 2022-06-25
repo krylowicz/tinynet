@@ -80,6 +80,10 @@ class TestReduceOps(unittest.TestCase):
         helper([(25, 25)], lambda x: x.max(axis=0), lambda x: torch.max(x, dim=0)[0])
         helper([(25, 3)], lambda x: x.max(axis=0).mul(Tensor(np.array(0.5))), lambda x: torch.max(x, dim=0)[0].mul(0.5))
 
+    def test_mean(self):
+        helper([(32, 16, 16, 3)], lambda x: x.mean(axis=(1, 2), keepdims=True), lambda x: torch.mean(x, dim=(1, 2), keepdim=True))
+        helper([(32, 16, 16, 3)], lambda x: x.mean(axis=(1, 2)), lambda x: torch.mean(x, dim=(1, 2)))
+
 
 class TestMovementOps(unittest.TestCase):
     def test_reshape(self):
