@@ -126,9 +126,6 @@ class Tensor:
     def log(self) -> Tensor:
         return Tensor.log(self)
 
-    def mean(self) -> Tensor:
-        return self.sum().mul(Tensor(np.array([1 / np.prod(self.shape)])))
-
     def transpose(self, axis: tuple[int, int] = (1, 0)) -> Tensor:
         return self.permute(axis)
 
@@ -139,6 +136,10 @@ class Tensor:
 
     def max(self, axis: int | tuple[int, ...] = None, keepdims: bool = False) -> Tensor:
         return self._max(axis=axis, keepdims=keepdims)
+
+    def mean(self, axis: int | tuple[int, ...] = None, keepdims: bool = False) -> Tensor:
+        out = self.sum(axis=axis, keepdims=keepdims)
+        return out * Tensor(np.array((np.prod(out.shape) / np.prod(self.shape))))
 
     # -- unary ops --
 
