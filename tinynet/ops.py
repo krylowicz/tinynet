@@ -202,26 +202,6 @@ class Mul(Function):
 
 
 @Function.register
-class Div(Function):
-    @staticmethod
-    def forward(ctx: Context, x: Tensor, y: Tensor) -> Tensor:
-        ctx.save_for_backward(x, y)
-
-        requires_grad = x.requires_grad or y.requires_grad
-
-        return Tensor(x.data / y.data, requires_grad=requires_grad)
-
-    @staticmethod
-    def backward(ctx: Context, grad_output: Tensor) -> tuple[Tensor, Tensor]:
-        x, y = ctx.saved_tensors
-
-        grad_x = unbroadcast(grad_output.data / y.data, x.shape)
-        grad_y = unbroadcast(-x.data * grad_output.data / (y.data ** 2), y.shape)
-
-        return Tensor(grad_x), Tensor(grad_y)
-
-
-@Function.register
 class Matmul(Function):
     @staticmethod
     def forward(ctx: Context, x: Tensor, y: Tensor) -> Tensor:

@@ -139,7 +139,7 @@ class Tensor:
 
     def mean(self, axis: int | tuple[int, ...] = None, keepdims: bool = False) -> Tensor:
         out = self.sum(axis=axis, keepdims=keepdims)
-        return out * Tensor(np.array((np.prod(out.shape) / np.prod(self.shape))))
+        return out * Tensor((np.prod(out.shape) / np.prod(self.shape)))
 
     # -- unary ops --
 
