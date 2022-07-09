@@ -3,12 +3,14 @@ from __future__ import annotations
 from functools import partialmethod
 from typing import Any
 
-from tinynet.tensor import Tensor
+from tinynet.tensor import Tensor, CL_CTX, CL_QUEUE
 
 
 class Context:
     def __init__(self, op_fn: Function, *tensors: Tensor) -> None:
         self.op_fn = op_fn
+        self.cl_ctx = CL_CTX
+        self.cl_queue = CL_QUEUE
         self.parents = [tensor for tensor in tensors if type(tensor) is Tensor]
         self.saved_tensors: list[Tensor] = []
 
@@ -58,10 +60,23 @@ class Function:
 
     # TODO: register already defined, i and r ops
     @staticmethod
-    def register(cls: Function) -> Function:
-        if (op_name := cls.__name__.lower()) in {"sum", "max"}:
-            setattr(Tensor, f"_{op_name}", partialmethod(cls.apply, cls))
-        else:
-            setattr(Tensor, op_name, partialmethod(cls.apply, cls))
+    def register(cls: Function = None, gpu: bool = False):
+        def _register(cls):
+            op_name = cls.__name__.lower()
 
-        return cls
+            if gpu:
+                Tensor.ops_gpu[op_name] = cls
+            else:
+                Tensor.ops_cpu[op_name] = cls
+
+            if op_name in {"sum", "max"}:
+                setattr(Tensor, f"_{op_name}", partialmethod(cls.apply, cls))
+            else:
+                setattr(Tensor, op_name, partialmethod(cls.apply, cls))
+
+            return cls
+
+        if cls:
+            return _register(cls)
+
+        return _register

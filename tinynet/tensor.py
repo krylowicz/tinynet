@@ -8,15 +8,21 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from tinynet.function import Context
 
-GPU = os.getenv("GPU", 0)
+GPU = int(os.getenv("GPU", 0))
+
+CL_CTX = None
+CL_QUEUE = None
 
 if GPU:
     import pyopencl as cl
-    ctx = cl.create_some_context(answers=[0])
-    queue = cl.CommandQueue(ctx)
+    CL_CTX = cl.create_some_context(answers=[0])
+    CL_QUEUE = cl.CommandQueue(CL_CTX)
 
 
 class Tensor:
+    ops_cpu = {}
+    ops_gpu = {}
+
     def __init__(
         self,
         data: np.ndarray | list[int | float],
@@ -29,6 +35,9 @@ class Tensor:
         self.is_parameter = is_parameter
         self.shape: tuple[int] = self._data.shape
         self._gpu = False
+
+        if GPU:
+            self.gpu()
 
         if self.requires_grad:
             self.zero_grad()
@@ -82,8 +91,11 @@ class Tensor:
     # -- gpu --
 
     def gpu(self) -> Tensor:
+        if not GPU:
+            raise RuntimeWarning("GPU is not available. set GPU=1 to enable")
+
         if not self._gpu:
-            self.data = cl.Buffer(ctx, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=self.data)
+            self.data = cl.Buffer(CL_CTX, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=self.data)
             self._gpu = True
 
         return self
@@ -91,7 +103,7 @@ class Tensor:
     def cpu(self) -> Tensor:
         if self._gpu:
             data = np.empty(self.shape, dtype=np.float32)
-            cl.enqueue_copy(queue, data, self.data)
+            cl.enqueue_copy(CL_QUEUE, data, self.data)
             self.data = data
             self._gpu = False
 
