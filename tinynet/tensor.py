@@ -1,10 +1,19 @@
 from __future__ import annotations
 
+import os
+
 import numpy as np
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from tinynet.function import Context
+
+GPU = os.getenv("GPU", 0)
+
+if GPU:
+    import pyopencl as cl
+    ctx = cl.create_some_context(answers=[0])
+    queue = cl.CommandQueue(ctx)
 
 
 class Tensor:
@@ -18,16 +27,14 @@ class Tensor:
         self._grad: Tensor | None = None
         self.requires_grad = requires_grad
         self.is_parameter = is_parameter
+        self.shape: tuple[int] = self._data.shape
+        self._gpu = False
 
         if self.requires_grad:
             self.zero_grad()
 
         # context for backpropagation
         self._ctx: Context | None = None
-
-    @property
-    def shape(self) -> tuple:
-        return self.data.shape
 
     @property
     def dtype(self) -> np.dtype:
@@ -46,8 +53,11 @@ class Tensor:
         return self._data
 
     @data.setter
-    def data(self, data: np.ndarray | list) -> None:
-        self._data = data if isinstance(data, np.ndarray) else np.array(data)
+    def data(self, data: np.ndarray | list | cl.Buffer) -> None:
+        if isinstance(data, cl.Buffer):
+            self._data = data
+        else:
+            self._data = data if isinstance(data, np.ndarray) else np.array(data)
 
     @property
     def T(self) -> Tensor:
@@ -68,6 +78,24 @@ class Tensor:
 
     def zero_grad(self) -> None:
         self.grad = np.ones_like(self.data)
+
+    # -- gpu --
+
+    def gpu(self) -> Tensor:
+        if not self._gpu:
+            self.data = cl.Buffer(ctx, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=self.data)
+            self._gpu = True
+
+        return self
+
+    def cpu(self) -> Tensor:
+        if self._gpu:
+            data = np.empty(self.shape, dtype=np.float32)
+            cl.enqueue_copy(queue, data, self.data)
+            self.data = data
+            self._gpu = False
+
+        return self
 
     # -- binary ops --
 
