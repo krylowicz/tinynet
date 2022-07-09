@@ -25,10 +25,10 @@ python setup.py develop
 I am planning to create a second Tensor class that is a wrapper around my other [tiny](http://github.com/krylowicz/tinydot) project
 
 ### Functions
-tinynet supports (not yet) these 17 ops, both on cpu and gpu (using PyOpenCL)
+tinynet supports (not yet) these 16 ops, both on cpu and gpu (using PyOpenCL)
 ```
 Relu, Log, Exp                      # unary ops
-Add, Sub, Mul, Div, Pow, Matmul     # binary ops
+Add, Sub, Mul, Pow, Matmul          # binary ops
 Sum, Max                            # reduce ops
 Reshape, Transpose, Slice           # movement ops
 Matmul, Conv1D, Conv2D              # processing ops
