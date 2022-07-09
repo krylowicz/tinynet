@@ -213,12 +213,13 @@ class Tensor:
 
     @classmethod
     def zeros(cls, *shape: int, **kwargs) -> Tensor:
-        return cls(np.zeros(shape), **kwargs)
+        return cls(np.zeros(*shape), **kwargs)
 
     @classmethod
     def ones(cls, *shape: int, **kwargs) -> Tensor:
-        return cls(np.ones(shape), **kwargs)
+        return cls(np.ones(*shape), **kwargs)
 
     @classmethod
     def randn(cls, *shape: int, **kwargs) -> Tensor:
-        return cls(np.random.randn(shape), **kwargs)
+        print(shape)
+        return cls(np.random.randn(*shape), **kwargs)
