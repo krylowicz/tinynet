@@ -6,7 +6,7 @@ import numpy as np
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from tinynet.function import Context
+    from tinynet.function import Context, Function
 
 GPU = int(os.getenv("GPU", 0))
 
@@ -20,8 +20,8 @@ if GPU:
 
 
 class Tensor:
-    ops_cpu = {}
-    ops_gpu = {}
+    ops_cpu: dict[str, Function] = {}
+    ops_gpu: dict[str, Function] = {}
 
     def __init__(
         self,
@@ -172,13 +172,13 @@ class Tensor:
 
     # -- reduce ops --
 
-    def sum(self, axis: int | tuple[int, ...] = None, keepdims: bool = False) -> Tensor:
+    def sum(self, axis: int | tuple[int, ...] | None = None, keepdims: bool = False) -> Tensor:
         return self._sum(axis=axis, keepdims=keepdims)
 
-    def max(self, axis: int | tuple[int, ...] = None, keepdims: bool = False) -> Tensor:
+    def max(self, axis: int | tuple[int, ...] | None = None, keepdims: bool = False) -> Tensor:
         return self._max(axis=axis, keepdims=keepdims)
 
-    def mean(self, axis: int | tuple[int, ...] = None, keepdims: bool = False) -> Tensor:
+    def mean(self, axis: int | tuple[int, ...] | None = None, keepdims: bool = False) -> Tensor:
         out = self.sum(axis=axis, keepdims=keepdims)
         return out * Tensor((np.prod(out.shape) / np.prod(self.shape)))
 
