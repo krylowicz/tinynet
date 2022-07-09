@@ -62,9 +62,10 @@ class Tensor:
         return self._data
 
     @data.setter
-    def data(self, data: np.ndarray | list | cl.Buffer) -> None:
-        if isinstance(data, cl.Buffer):
+    def data(self, data: np.ndarray | list | cl._cl.Buffer) -> None:
+        if GPU and isinstance(data, cl._cl.Buffer):
             self._data = data
+            self._gpu = True
         else:
             self._data = data if isinstance(data, np.ndarray) else np.array(data)
 
