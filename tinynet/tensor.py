@@ -221,5 +221,4 @@ class Tensor:
 
     @classmethod
     def randn(cls, *shape: int, **kwargs) -> Tensor:
-        print(shape)
         return cls(np.random.randn(*shape), **kwargs)

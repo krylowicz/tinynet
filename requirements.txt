@@ -1,5 +1,6 @@
 numpy
 requests
+pyopencl
 # testing
 pytest
 torch

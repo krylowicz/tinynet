@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from functools import partialmethod
 from typing import Any
 
 from tinynet.tensor import Tensor, CL_CTX, CL_QUEUE
@@ -51,9 +50,11 @@ class Function:
         """
         raise NotImplementedError("You must implement the backward method for custom ops function")
 
-    def apply(self: Tensor, op_fn: Function, *tensors: Tensor, **kwargs: Any) -> Tensor:
-        ctx = Context(op_fn, self, *tensors)
-        ret = op_fn.forward(ctx, self, *tensors, **kwargs)
+    def apply(self: Function, *tensors: Tensor, **kwargs: Any) -> Tensor:
+        op_fn = self
+
+        ctx = Context(op_fn, *tensors)
+        ret = op_fn.forward(ctx, *tensors, **kwargs)
         ret._ctx = ctx
 
         return ret
@@ -69,10 +70,15 @@ class Function:
             else:
                 Tensor.ops_cpu[op_name] = cls
 
+            def dispatch(cls, *tensors, **kwargs):
+                op_fn = (Tensor.ops_gpu if cls._gpu else Tensor.ops_cpu)[op_name]
+
+                return op_fn.apply(op_fn, cls, *tensors, **kwargs)
+
             if op_name in {"sum", "max"}:
-                setattr(Tensor, f"_{op_name}", partialmethod(cls.apply, cls))
+                setattr(Tensor, f"_{op_name}", dispatch)
             else:
-                setattr(Tensor, op_name, partialmethod(cls.apply, cls))
+                setattr(Tensor, op_name, dispatch)
 
             return cls
 
