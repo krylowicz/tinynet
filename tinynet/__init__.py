@@ -1,2 +1,4 @@
+from tinynet.constants import GPU
 from tinynet.ops_cpu import *
-from tinynet.ops_gpu import *
+if GPU:
+    from tinynet.ops_gpu import *

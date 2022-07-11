@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-import os
+import warnings
 
 import numpy as np
 from typing import TYPE_CHECKING
 
+from tinynet.constants import GPU
+
 if TYPE_CHECKING:
     from tinynet.function import Context, Function
-
-GPU = int(os.getenv("GPU", 0))
 
 CL_CTX = None
 CL_QUEUE = None
@@ -18,7 +18,8 @@ if GPU:
     devices = cl.get_platforms()[0].get_devices(cl.device_type.GPU)
 
     if len(devices) == 0:
-        raise RuntimeError("No GPU found")
+        devices = cl.get_platforms()[0].get_devices(device_type=cl.device_type.CPU)
+        warnings.warn("No GPU found. Falling back to CPU with OpenCL kernels.", RuntimeWarning)
 
     CL_CTX = cl.Context(devices=devices)
     CL_QUEUE = cl.CommandQueue(CL_CTX)
@@ -119,7 +120,7 @@ class Tensor:
 
     def gpu(self) -> Tensor:
         if not GPU:
-            raise RuntimeWarning("GPU is not available. set GPU=1 to enable")
+            warnings.warn("GPU is not available. set GPU=1 to enable", RuntimeWarning)
 
         if not self._gpu:
             data = cl.Buffer(CL_CTX, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=self.data)
