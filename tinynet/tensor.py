@@ -29,12 +29,11 @@ class Tensor:
         requires_grad: bool = False,
         is_parameter: bool = False
     ) -> None:
-        self._data = data.astype(np.float32) if isinstance(data, np.ndarray) else np.array(data, dtype=np.float32)
+        self._gpu = False
+        self._data = self._assign_data(data)
         self._grad: Tensor | None = None
         self.requires_grad = requires_grad
         self.is_parameter = is_parameter
-        self.shape: tuple[int] = self._data.shape
-        self._gpu = False
 
         if GPU:
             self.gpu()
@@ -44,6 +43,10 @@ class Tensor:
 
         # context for backpropagation
         self._ctx: Context | None = None
+
+    @property
+    def shape(self) -> tuple[int, ...]:
+        return self.data.shape
 
     @property
     def dtype(self) -> np.dtype:
@@ -63,11 +66,29 @@ class Tensor:
 
     @data.setter
     def data(self, data: np.ndarray | list | cl._cl.Buffer) -> None:
-        if GPU and isinstance(data, cl._cl.Buffer):
-            self._data = data
+        self._data = self._assign_data(data)
+
+    def _assign_data(self, data):
+        if isinstance(data, list):
+            self._gpu = False
+
+            return np.array(data).astype(np.float32)
+        elif isinstance(data, np.ndarray):
+            self._gpu = False
+
+            return data.astype(np.float32)
+        elif GPU and isinstance(data, cl._cl.Buffer):
             self._gpu = True
+
+            return data
         else:
-            self._data = data if isinstance(data, np.ndarray) else np.array(data)
+            try:
+                data = np.array(data).astype(np.float32)
+                self._gpu = False
+
+                return data
+            except Exception:
+                raise TypeError(f"Tensor data must be list, numpy.ndarray or cl.Buffer. got {type(data)}")
 
     @property
     def T(self) -> Tensor:
@@ -81,7 +102,7 @@ class Tensor:
         return self.__repr__()
 
     def __getitem__(self, key: slice | tuple) -> Tensor:
-        return Tensor(self.data[key])
+        return Tensor(self.data[key], requires_grad=self.requires_grad, is_parameter=self.is_parameter)
 
     def __setitem__(self, key: slice | tuple, value: Tensor | np.ndarray) -> None:
         self.data[key] = value.data if isinstance(value, Tensor) else value
@@ -96,8 +117,10 @@ class Tensor:
             raise RuntimeWarning("GPU is not available. set GPU=1 to enable")
 
         if not self._gpu:
-            self.data = cl.Buffer(CL_CTX, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=self.data)
-            self._gpu = True
+            data = cl.Buffer(CL_CTX, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=self.data)
+            data.shape = self.shape
+
+            return Tensor(data, requires_grad=self.requires_grad, is_parameter=self.is_parameter)
 
         return self
 

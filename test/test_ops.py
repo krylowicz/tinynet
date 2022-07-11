@@ -14,7 +14,7 @@ def helper(shapes, tiny_op, torch_op):
     tiny_res = tiny_op(*tiny_tensors)
     torch_res = torch_op(*torch_tensors)
 
-    np.testing.assert_allclose(tiny_res.data, torch_res.detach().numpy(), atol=1e-5)
+    np.testing.assert_allclose(tiny_res.cpu().data, torch_res.detach().numpy(), atol=1e-5)
 
     print("forward pass passed")
 
@@ -23,7 +23,7 @@ def helper(shapes, tiny_op, torch_op):
 
     for tiny_grad, torch_grad in zip(tiny_tensors, torch_tensors):
         print(tiny_grad.grad.shape, torch_grad.grad.shape)
-        np.testing.assert_allclose(tiny_grad.grad.data, torch_grad.grad.detach().numpy(), atol=1e-5)
+        np.testing.assert_allclose(tiny_grad.grad.cpu().data, torch_grad.grad.detach().numpy(), atol=1e-5)
 
 
 class TestUnaryOps(unittest.TestCase):
