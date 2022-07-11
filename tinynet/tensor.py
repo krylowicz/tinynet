@@ -15,7 +15,12 @@ CL_QUEUE = None
 
 if GPU:
     import pyopencl as cl
-    CL_CTX = cl.create_some_context(answers=[0])
+    devices = cl.get_platforms()[0].get_devices(cl.device_type.GPU)
+
+    if len(devices) == 0:
+        raise RuntimeError("No GPU found")
+
+    CL_CTX = cl.Context(devices=devices)
     CL_QUEUE = cl.CommandQueue(CL_CTX)
 
 
