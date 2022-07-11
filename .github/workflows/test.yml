@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   numpy_cpu:
-    name: Numpy tests
+    name: Numpy tests (CPU)
     runs-on: ubuntu-latest
 
     steps:
@@ -26,3 +26,27 @@ jobs:
       run: python examples/mnist.py
     - name: Run other tests
       run: python -m pytest test/test_tensor.py test/test_utils.py -v -s
+
+  opencl_gpu:
+    name: PyOpenCL tests (GPU)
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Update packages
+      run: sudo apt-get update
+    - name: Set up python 3.10
+      uses: actions/setup-python@v2
+      with:
+          python-version: '3.10'
+    - name: Install dependencies
+      run: pip install -e '.[testing, gpu]'
+    - name: Run op tests
+      run: GPU=1 python -m pytest test/test_ops.py -v -s
+    - name: Run optim tests
+      run: GPU=1 python -m pytest test/test_optim.py -v -s
+    - name: Run mnist example
+      run: GPU=1 python examples/mnist.py
+    - name: Run other tests
+      run: GPU=1 python -m pytest test/test_tensor.py test/test_utils.py -v -s

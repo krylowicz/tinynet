@@ -14,9 +14,9 @@ setup(
   install_requires=[
     'numpy',
     'requests',
-    'pyopencl'
   ],
   extras_require={
     'testing': ['pytest', 'torch', 'tqdm'],
+    'gpu': ['pyopencl']
   }
 )
