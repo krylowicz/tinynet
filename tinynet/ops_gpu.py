@@ -5,12 +5,18 @@ from tinynet.tensor import Tensor
 from tinynet.function import Function, Context
 
 
+def new_cl_buffer(ctx: cl.Context, data: np.ndarray) -> cl._cl.Buffer:
+    buffer = cl.Buffer(ctx, cl.mem_flags.WRITE_ONLY, data.size * 4)
+    buffer.shape = data.shape
+
+    return buffer
+
+
 @Function.register(gpu=True)
 class Add(Function):
     @staticmethod
     def forward(ctx: Context, x: Tensor, y: Tensor) -> Tensor:
-        ret = cl.Buffer(ctx.cl_ctx, cl.mem_flags.WRITE_ONLY, x.data.size * 4)
-        ret.shape = x.shape
+        ret = new_cl_buffer(ctx.cl_ctx, x.data + y.data)  # TODO: this is bad, determine the output shape in other way
         prg = cl.Program(ctx.cl_ctx, """
             __kernel void add(__global const float *x, __global const float *y, __global float *ret) {
                 int g_id = get_global_id(0);
@@ -31,8 +37,7 @@ class Add(Function):
 class Sub(Function):
     @staticmethod
     def forward(ctx: Context, x: Tensor, y: Tensor) -> Tensor:
-        ret = cl.Buffer(ctx.cl_ctx, cl.mem_flags.WRITE_ONLY, x.data.size * 4)
-        ret.shape = x.shape
+        ret = new_cl_buffer(ctx.cl_ctx, x.data - y.data)
         prg = cl.Program(ctx.cl_ctx, """
             __kernel void sub(__global const float *x, __global const float *y, __global float *ret) {
                 int g_id = get_global_id(0);
