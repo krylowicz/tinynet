@@ -12,6 +12,7 @@ def new_cl_buffer(ctx: cl.Context, output_shape: tuple[int, ...]) -> cl._cl.Buff
     return buffer
 
 
+# binary ops
 def determine_shape(x_shape: tuple[int, ...], y_shape: tuple[int, ...]) -> tuple[int, ...]:
     return np.broadcast_shapes(x_shape, y_shape)
 
@@ -21,10 +22,10 @@ def binary_op(ctx: Context, name: str, op_fn: str, x: Tensor, y: Tensor) -> Tens
     prg = cl.Program(ctx.cl_ctx, f"""
         __kernel void {name}(__global const float *x, __global const float *y, __global float *ret) {{
             int g_id = get_global_id(0);
-            ret[g_id] = x[gid] {op_fn} y[gid]; 
+            ret[g_id] = x[g_id] {op_fn} y[g_id]; 
         }}
     """).build()
-    prg.__dict__[name](ctx.cl_queue, (ret.size // 4,), None, x.data, y.data, ret)
+    prg.__getattr__(name)(ctx.cl_queue, (ret.size // 4,), None, x.data, y.data, ret)
     requires_grad = x.requires_grad or y.requires_grad
 
     return Tensor(ret, requires_grad=requires_grad)

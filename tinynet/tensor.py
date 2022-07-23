@@ -126,7 +126,7 @@ class Tensor:
             data = cl.Buffer(CL_CTX, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=self.data)
             data.shape = self.shape
 
-            return Tensor(data, requires_grad=self.requires_grad, is_parameter=self.is_parameter)
+            self.data = data
 
         return self
 
