@@ -10,7 +10,7 @@ class Context:
         self.op_fn = op_fn
         self.cl_ctx = CL_CTX
         self.cl_queue = CL_QUEUE
-        self.parents = [tensor for tensor in tensors if type(tensor) is Tensor]
+        self.parents: list[Tensor] = [tensor for tensor in tensors if type(tensor) is Tensor]
         self.saved_tensors: list[Tensor] = []
 
     def save_for_backward(self, *tensors: Tensor) -> None:

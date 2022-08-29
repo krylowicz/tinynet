@@ -33,13 +33,13 @@ class Tensor:
         self,
         data: np.ndarray | list[int | float],
         requires_grad: bool = False,
-        is_parameter: bool = False
+        is_parameter: bool = False,
     ) -> None:
         self._gpu = False
         self._data = self._assign_data(data)
         self._grad: Tensor | None = None
-        self.requires_grad = requires_grad
-        self.is_parameter = is_parameter
+        self.requires_grad: bool = requires_grad
+        self.is_parameter: bool = is_parameter
 
         if GPU:
             self.gpu()

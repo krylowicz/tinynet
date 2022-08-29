@@ -2,6 +2,7 @@ import torch
 import unittest
 import numpy as np
 
+from tinynet.constants import GPU
 from tinynet.tensor import Tensor
 
 
@@ -15,6 +16,9 @@ def helper(shapes, tiny_op, torch_op):
     torch_res = torch_op(*torch_tensors)
 
     np.testing.assert_allclose(tiny_res.cpu().data, torch_res.detach().numpy(), atol=1e-5)
+
+    if GPU:  # undoes .cpu() from line above
+        tiny_res.gpu()
 
     print("forward pass passed")
 
