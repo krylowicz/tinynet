@@ -39,7 +39,7 @@ class ReLU(Function):
         prg = cl.Program(ctx.cl_ctx, """
             __kernel void relu(__global float* x, __global float* grad_output, __global float* ret) {
                 int g_id = get_global_id(0);
-                ret[g_id] = grad_output * (float)(x >= 0);
+                ret[g_id] = grad_output[g_id] * (float)(x >= 0);
             }
         """).build()
         prg.relu(ctx.cl_queue, (ret.size,), None, x.data, grad_output.data, ret)
@@ -104,7 +104,6 @@ class Mul(Function):
 class Sum(Function):  # only fully reduced sum for now
     @staticmethod
     def forward(ctx: Context, x: Tensor, axis=None, keepdims=False) -> Tensor:
-        print(x.gpu)
         ctx.save_for_backward(x)
 
         ret = new_cl_buffer(ctx.cl_ctx, (1,))
