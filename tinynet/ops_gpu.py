@@ -47,6 +47,39 @@ class ReLU(Function):
         return Tensor(ret)
 
 
+@Function.register(gpu=True)
+class Exp(Function):
+    @staticmethod
+    def forward(ctx: Context, x: Tensor) -> Tensor:
+        ctx.save_for_backward(x)
+
+        ret = new_cl_buffer(ctx.cl_ctx, x.shape)
+        prg = cl.Program(ctx.cl_ctx, """
+            __kernel void exp(__global float* x, __global float* ret) {
+                int g_id = get_global_id(0);
+                ret[g_id] = exp(x[g_id]);
+            }
+        """).build()
+        prg.exp(ctx.cl_queue, (ret.size,), None, x.data, ret)
+
+        return Tensor(ret, requires_grad=x.requires_grad)
+
+    @staticmethod
+    def backward(ctx: Context, grad_output: Tensor) -> Tensor:
+        x, = ctx.saved_tensors
+
+        ret = new_cl_buffer(ctx.cl_ctx, x.shape)
+        prg = cl.Program(ctx.cl_ctx, """
+            __kernel void exp(__global float* x, __global float* grad_output, __global float* ret) {
+                int g_id = get_global_id(0);
+                ret[g_id] = grad_output[g_id] * exp(x[g_id]);
+            }
+        """).build()
+        prg.exp(ctx.cl_queue, (ret.size,), None, x.data, grad_output.data, ret)
+
+        return Tensor(ret)
+
+
 # binary ops
 def determine_shape(x_shape: tuple[int, ...], y_shape: tuple[int, ...]) -> tuple[int, ...]:
     return np.broadcast_shapes(x_shape, y_shape)
