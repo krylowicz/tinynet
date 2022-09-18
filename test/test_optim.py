@@ -1,9 +1,11 @@
 import numpy as np
+import pytest
 import unittest
 
 import torch
 import torch.optim as torch_optim
 
+from tinynet.constants import GPU
 import tinynet.optim as optim
 from tinynet.tensor import Tensor
 
@@ -62,10 +64,12 @@ def torch_optimizer(optimizer, **kwargs):
 
 
 class TestOptim(unittest.TestCase):
+    @pytest.mark.skipif(GPU, reason="this op is not implemented on GPU")
     def test_sgd(self):
         for x, y in zip(tiny_optimizer(optim.SGD, lr=0.01), torch_optimizer(torch_optim.SGD, lr=0.01)):
             np.testing.assert_allclose(x, y)
 
+    @pytest.mark.skipif(GPU, reason="this op is not implemented on GPU")
     def test_optim(self):
         for x, y in zip(
             tiny_optimizer(optim.RMSProp, lr=0.001, decay=0.9, eps=1e-8),
@@ -73,6 +77,7 @@ class TestOptim(unittest.TestCase):
         ):
             np.testing.assert_allclose(x, y)
 
+    @pytest.mark.skipif(GPU, reason="this op is not implemented on GPU")
     def test_adam(self):
         for x, y in zip(tiny_optimizer(optim.Adam), torch_optimizer(torch_optim.Adam)):
             np.testing.assert_allclose(x, y)

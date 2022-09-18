@@ -1,5 +1,6 @@
 import torch
 import unittest
+import pytest
 import numpy as np
 
 from tinynet.constants import GPU
@@ -31,19 +32,24 @@ def helper(shapes, tiny_op, torch_op):
 
 
 class TestUnaryOps(unittest.TestCase):
+    @pytest.mark.skipif(GPU, reason="this op is not implemented on GPU")
     def test_relu(self):
         helper([(10, 10)], Tensor.relu, torch.relu)
 
+    @pytest.mark.skipif(GPU, reason="this op is not implemented on GPU")
     def test_exp(self):
         helper([(10, 10)], Tensor.exp, torch.exp)
 
+    @pytest.mark.skipif(GPU, reason="this op is not implemented on GPU")
     def test_log(self):
         helper([(10, 10)], Tensor.log, torch.log)
 
+    @pytest.mark.skipif(GPU, reason="this op is not implemented on GPU")
     def test_softmax(self):
         helper([(1, 10)], Tensor.softmax, lambda x: torch.softmax(x, dim=1))
         helper([(32, 10)], Tensor.softmax, lambda x: torch.softmax(x, dim=1))
 
+    @pytest.mark.skipif(GPU, reason="this op is not implemented on GPU")
     def test_logsoftmax(self):
         helper([(1, 10)], Tensor.logsoftmax, lambda x: torch.log_softmax(x, dim=1))
         helper([(32, 10)], Tensor.logsoftmax, lambda x: torch.log_softmax(x, dim=1))
@@ -53,23 +59,29 @@ class TestBinaryOps(unittest.TestCase):
     def test_add(self):
         helper([(25, 25), (25, 25)], Tensor.add, torch.add)
 
+    @pytest.mark.skipif(GPU, reason="this op is not implemented on GPU")
     def test_sub(self):
         helper([(25, 25), (25, 25)], Tensor.sub, torch.sub)
 
+    @pytest.mark.skipif(GPU, reason="this op is not implemented on GPU")
     def test_mul(self):
         helper([(25, 25), (25, 25)], Tensor.mul, torch.mul)
 
+    @pytest.mark.skipif(GPU, reason="this op is not implemented on GPU")
     def test_div(self):
         helper([(10, 10), (10, 10)], Tensor.div, torch.div)
 
+    @pytest.mark.skipif(GPU, reason="this op is not implemented on GPU")
     def test_matmul(self):
         helper([(25, 25), (25, 25)], Tensor.dot, torch.matmul)
 
+    @pytest.mark.skipif(GPU, reason="this op is not implemented on GPU")
     def test_pow(self):
         helper([(10, 10), (10, 10)], Tensor.pow, torch.pow)
 
 
 class TestReduceOps(unittest.TestCase):
+    @pytest.mark.skipif(GPU, reason="this op is not implemented on GPU")
     def test_sum(self):
         helper([(32, 16, 16, 3)], Tensor.sum, torch.sum)
         helper([(32, 16, 16, 3)], lambda x: x.sum(axis=0, keepdims=True), lambda x: torch.sum(x, dim=0, keepdim=True))
@@ -78,24 +90,29 @@ class TestReduceOps(unittest.TestCase):
         helper([(32, 16, 16, 3)], lambda x: x.sum(axis=(1, 3), keepdims=True), lambda x: torch.sum(x, dim=(1, 3), keepdim=True))
         helper([(32, 16, 16, 3)], lambda x: x.sum(axis=(1, 3)), lambda x: torch.sum(x, dim=(1, 3)))
 
+    @pytest.mark.skipif(GPU, reason="this op is not implemented on GPU")
     def test_max(self):
         helper([(25, 25)], Tensor.max, torch.max)
         helper([(25, 25)], lambda x: x.max(axis=0, keepdims=True), lambda x: torch.max(x, dim=0, keepdim=True)[0])
         helper([(25, 25)], lambda x: x.max(axis=0), lambda x: torch.max(x, dim=0)[0])
         helper([(25, 3)], lambda x: x.max(axis=0).mul(Tensor(np.array(0.5))), lambda x: torch.max(x, dim=0)[0].mul(0.5))
 
+    @pytest.mark.skipif(GPU, reason="this op is not implemented on GPU")
     def test_mean(self):
         helper([(32, 16, 16, 3)], lambda x: x.mean(axis=(1, 2), keepdims=True), lambda x: torch.mean(x, dim=(1, 2), keepdim=True))
         helper([(32, 16, 16, 3)], lambda x: x.mean(axis=(1, 2)), lambda x: torch.mean(x, dim=(1, 2)))
 
 
 class TestMovementOps(unittest.TestCase):
+    @pytest.mark.skipif(GPU, reason="this op is not implemented on GPU")
     def test_reshape(self):
         helper([(2, 3, 4)], lambda x: x.reshape((2, 12)), lambda x: torch.reshape(x, (2, 12)))
 
+    @pytest.mark.skipif(GPU, reason="this op is not implemented on GPU")
     def test_permute(self):
         helper([(6, 5, 4)], lambda x: x.permute((2, 0, 1)), lambda x: torch.permute(x, (2, 0, 1)))
 
+    @pytest.mark.skipif(GPU, reason="this op is not implemented on GPU")
     def test_transpose(self):
         helper([(2, 3)], lambda x: x.transpose((1, 0)), lambda x: torch.permute(x, (1, 0)))
         helper([(2, 3)], lambda x: x.transpose((1, 0)), lambda x: torch.transpose(x, 1, 0))

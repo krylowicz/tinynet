@@ -1,16 +1,20 @@
+import pytest
 import unittest
 import torch
 import numpy as np
 
+from tinynet.constants import GPU
 from tinynet.tensor import Tensor
 
 
 class TestTensor(unittest.TestCase):
+    @pytest.mark.skipif(GPU, reason="this op is not implemented on GPU")
     def test_transpose(self):
         x = Tensor.randn(3, 7)
 
         self.assertEqual(x.T.shape, (7, 3))
 
+    @pytest.mark.skipif(GPU, reason="this op is not implemented on GPU")
     def test_backward(self):
         xi = np.random.randn(1, 3)
         Wi = np.random.randn(3, 3)
