@@ -171,6 +171,9 @@ class Tensor:
     __truediv__ = div
 
     def __neg__(self) -> Tensor:
+        if GPU:
+            return Tensor(np.array(0.0)) - self
+
         self.data = -self.data
 
         return self

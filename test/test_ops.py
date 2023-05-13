@@ -59,7 +59,6 @@ class TestBinaryOps(unittest.TestCase):
     def test_add(self):
         helper([(25, 25), (25, 25)], Tensor.add, torch.add)
 
-    @pytest.mark.skipif(GPU, reason="this op is not implemented on GPU")
     def test_sub(self):
         helper([(25, 25), (25, 25)], Tensor.sub, torch.sub)
 
